@@ -4,6 +4,6 @@
 - [x] Connect all entry points and verify the flow
 
 # Demo juri dan QA akhir
-- [ ] Rute /pitch layar penuh: lima scene, simulasi setoran global, tautan ke prototipe
-- [ ] Bahasa, sumber angka, motion terpusat, reduced motion, target sentuh dan kontras
-- [ ] Verifikasi demo dan alur utama seluruh halaman
+- [x] Rute /pitch layar penuh: lima scene, simulasi setoran global, tautan ke prototipe
+- [x] Bahasa, sumber angka, motion terpusat, reduced motion, target sentuh dan kontras
+- [x] Verifikasi demo dan alur utama seluruh halaman
