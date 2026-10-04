@@ -79,7 +79,12 @@ function Pitch() {
       <span className="text-sm font-semibold">Ala Impian Haji <span className="ml-2 font-normal">· STEP</span></span>
       <span className="text-xs tabular">{active} / 5</span>
     </header>
-    <div id="pitch-scroll" ref={scroll} tabIndex={0} className="no-scrollbar h-dvh snap-y snap-mandatory overflow-y-auto outline-none" onScroll={e => setActive(Math.max(1, Math.min(5, Math.round(e.currentTarget.scrollTop / e.currentTarget.clientHeight) + 1)))}>
+    <div id="pitch-scroll" ref={scroll} tabIndex={0} className="no-scrollbar h-dvh snap-y snap-mandatory overflow-y-auto outline-none" onScroll={e => {
+      const top = e.currentTarget.scrollTop + e.currentTarget.clientHeight / 2;
+      const scenes = Array.from(e.currentTarget.querySelectorAll<HTMLElement>("section"));
+      const index = scenes.findIndex(scene => top >= scene.offsetTop && top < scene.offsetTop + scene.offsetHeight);
+      if (index >= 0) setActive(index + 1);
+    }}>
       <Scene index={1} dark>
         <Kaaba className="mb-8 h-16 w-16 text-mint" />
         <p className="mb-5 text-xs font-medium uppercase tracking-widest text-mint">Dari niat, menjadi langkah</p>

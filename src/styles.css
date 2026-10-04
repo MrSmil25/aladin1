@@ -148,6 +148,20 @@
   .pitch-phone { padding: 12px; max-width: 230px; }
   .pitch-phone p { margin-top: 8px; }
   .pitch-phone > div:first-child { margin-bottom: 12px; }
+  .pitch-comparison .pitch-phone { padding: 10px 12px; }
+  .pitch-comparison .pitch-phone p { margin-top: 4px; }
+  .pitch-comparison .pitch-phone div { margin-top: 4px; padding-top: 4px; padding-bottom: 4px; }
+  .pitch-comparison .pitch-phone > div:first-child { margin-top: 0; padding: 0; margin-bottom: 8px; }
+  .pitch-comparison .pitch-phone .text-2xl { font-size: 22px; }
+  .pitch-comparison .pitch-phone .text-3xl { font-size: 26px; }
+  .pitch-comparison > div:first-child > .h-20 { height: 56px; margin-top: 12px; }
+  .pitch-comparison > div:first-child > p { margin-top: 8px; font-size: 14px; }
+  .pitch-comparison > div:first-child > h2 { margin-top: 8px; }
+  .pitch-comparison > div:first-child > .h-20 .text-5xl { font-size: 36px; }
+  .pitch-comparison > div:first-child > .h-20 .h-16 { height: 48px; }
+}
+@media (min-width: 600px) and (max-width: 767px) and (max-height: 740px) {
+  .pitch-comparison { grid-template-columns: 1.3fr 1fr; gap: 24px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0s !important; transition-duration: 0s !important; }
