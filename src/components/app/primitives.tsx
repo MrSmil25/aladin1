@@ -1,5 +1,5 @@
 import { animate, motion, useReducedMotion } from "framer-motion";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, useRef, type ReactNode } from "react";
 import { toast } from "sonner";
 import { dur, easeOut, press } from "@/lib/motion";
 import { formatRp } from "@/lib/estimate";
@@ -9,23 +9,28 @@ export const notInPrototype = () => toast(mock.notInPrototype);
 
 export function Money({ value, className }: { value: number; className?: string }) {
   const reduce = useReducedMotion();
-  const [v, setV] = useState(reduce ? value : 0);
+  const [v, setV] = useState(value);
+  const previous = useRef(value);
   useEffect(() => {
+    const from = previous.current;
+    previous.current = value;
     if (reduce) return setV(value);
-    const c = animate(0, value, { duration: 0.6, ease: easeOut, onUpdate: setV });
+    const c = animate(from, value, { duration: 0.45, ease: easeOut, onUpdate: setV });
     return () => c.stop();
   }, [value, reduce]);
   return <span className={`tabular ${className ?? ""}`}>{formatRp(v)}</span>;
 }
 
 export function Progress({ pct, layoutId, track = "bg-muted", delay = 0.1 }: { pct: number; layoutId?: string; track?: string; delay?: number }) {
+  const reduce = useReducedMotion();
+  const safePct = Math.max(0, Math.min(100, pct));
   return (
     <motion.div {...(layoutId ? { layoutId } : {})} className={`relative h-2 w-full rounded-full ${track}`}>
       <motion.div
         className="absolute inset-y-0 left-0 rounded-full bg-mint"
         initial={{ width: 0 }}
-        animate={{ width: `${pct}%` }}
-        transition={{ duration: dur.emphasis * 2, ease: easeOut, delay }}
+        animate={{ width: `${safePct}%` }}
+        transition={{ duration: reduce ? 0 : 0.45, ease: easeOut, delay: reduce ? 0 : delay }}
       >
         <span className="absolute -right-1 top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-mint shadow-[var(--shadow-glow)]" />
       </motion.div>

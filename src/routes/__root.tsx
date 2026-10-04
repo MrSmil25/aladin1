@@ -15,6 +15,8 @@ import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { AppProvider } from "@/lib/store";
+import { StepSheet } from "@/components/app/StepSheet";
 import { BottomNav } from "@/components/app/BottomNav";
 import { dur, easeOut } from "@/lib/motion";
 
@@ -81,7 +83,7 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="id">
       <head><HeadContent /></head>
-      <body>{children}<Scripts /></body>
+      <body><AppProvider>{children}</AppProvider><Scripts /></body>
     </html>
   );
 }
@@ -114,6 +116,7 @@ function RootComponent() {
             </LayoutGroup>
             {showNav && <BottomNav />}
             <div id="sheet-root" />
+            <StepSheet />
             <Toaster position="top-center" toastOptions={{ className: "font-sans" }} style={{ position: "absolute" }} />
           </div>
         </div>

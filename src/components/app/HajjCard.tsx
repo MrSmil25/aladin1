@@ -3,16 +3,18 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronDown, ChevronRight, Footprints } from "lucide-react";
 import { useState } from "react";
 import { mock } from "@/data/mock";
-import { useAppState } from "@/lib/store";
+import { useAppState, useAppActions } from "@/lib/store";
 import { estimasiSiapDaftar, formatBulan, formatRp } from "@/lib/estimate";
 import { dur, easeOut, press, spring } from "@/lib/motion";
-import { Kaaba, Money, Progress, notInPrototype } from "./primitives";
+import { Button } from "@/components/ui/button";
+import { Kaaba, Money, Progress } from "./primitives";
 
 export function HajjCard({ first }: { first: boolean }) {
   const [open, setOpen] = useState(true);
   const reduce = useReducedMotion();
   const nav = useNavigate();
   const app = useAppState();
+  const { openStep } = useAppActions();
   const h = { ...mock.haji, ...app.haji };
   const baru = app.userState === "baru";
   const pct = (h.saldo / h.target) * 100;
@@ -56,6 +58,7 @@ export function HajjCard({ first }: { first: boolean }) {
                   <motion.div animate={reduce ? {} : { scale: [1, 1.04, 1] }} transition={{ delay: 2, duration: 0.9 }} className="mt-5">
                     <Link to="/impian-haji/rencana" className="flex h-12 items-center justify-center rounded-full bg-mint text-sm font-semibold text-mint-foreground">Hitung Rencana Hajiku</Link>
                   </motion.div>
+                  <Button onClick={() => openStep()} className="mt-3 h-11 w-full rounded-full"><Footprints />Ambil STEP</Button>
                   <p className="mt-3 text-center text-xs text-primary-foreground/60">{mock.trust}</p>
                 </div>
               ) : (
@@ -76,7 +79,7 @@ export function HajjCard({ first }: { first: boolean }) {
                     </motion.p>
                   </button>
                   <div className="mt-5 flex gap-3">
-                    <motion.button {...press} onClick={notInPrototype} className="flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+                    <motion.button {...press} onClick={() => openStep()} className="flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-primary text-sm font-semibold text-primary-foreground">
                       <Footprints size={18} strokeWidth={1.75} />Ambil STEP
                     </motion.button>
                     <motion.div {...press} className="flex-1">
