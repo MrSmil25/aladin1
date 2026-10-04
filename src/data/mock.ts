@@ -2,10 +2,15 @@
 export type UserState = "baru" | "aktif";
 
 export const SETORAN_AWAL = 25_000_000;
+export const DEPOSIT_MIN = 10_000;
+export const DEPOSIT_CHIPS = [DEPOSIT_MIN, 25_000, 50_000, 100_000];
+export const WEEKLY_CHIPS = [25_000, 50_000, 100_000, 150_000, 250_000];
+export const FIRST_DEPOSITS = [DEPOSIT_MIN, 50_000, 100_000];
 
 export const mock = {
   userState: "baru" as UserState,
   today: new Date(2026, 9, 1), // Oktober 2026
+  pitch: { beforeMonthly: DEPOSIT_MIN, beforeDate: new Date(2235, 2, 5), weekly: 150_000, deposit: 100_000 },
   dompet: { saldo: 2_450_000 },
   haji: {
     saldo: 6_250_000,
@@ -44,7 +49,7 @@ export const mock = {
     { id: "deposito", label: "Ala Deposito", badge: "8,5%" },
     { id: "impian", label: "Ala Impian" },
     { id: "donasi", label: "Donasi" },
-    { id: "ewallet", label: "E-Wallet" },
+    { id: "ewallet", label: "Dompet Digital" },
     { id: "pulsa", label: "Pulsa" },
     { id: "listrik", label: "Token Listrik" },
     { id: "anak", label: "Tabungan Anak" },

@@ -12,3 +12,5 @@
 - Keep prototype balances, savings settings and STEP overlays in one shell-mounted React context with stable HMR identity; this covers route boundaries and keeps refreshed providers and consumers aligned without real banking transactions.
 - Reuse the global STEP SAVE and TRANSACT views for card and menu entry points; this prevents divergent settings and deposit-code experiences.
 - Generate milestone share artwork as a browser-side 9:16 PNG using Canvas and semantic CSS tokens; this makes the shared file match the displayed achievement without server dependencies.
+- Render presentation routes outside the phone frame while retaining the shell provider and global overlays; this keeps jury-demo deposits consistent with the prototype.
+- Keep illustration amounts and dates in mock data, calculations in estimate helpers, and animation timing in motion utilities; this prevents conflicting demo figures and motion behavior.
