@@ -38,7 +38,6 @@ export const mock = {
     { name: "Raka, 28", day: 120, total: 4_350_000, quote: "Setor tiap Jumat, sekarang udah kebiasaan." },
     { name: "Alya & Farhan, 29", day: 210, total: 9_800_000, quote: "Nabung berdua bikin makin semangat." },
   ],
-  },
   trust: "Bank Penerima Setoran BPIH · Terhubung SISKOHAT",
   products: [
     { id: "haji", label: "Impian Haji", badge: "8%" },
