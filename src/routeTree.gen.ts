@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as KeuanganRouteImport } from './routes/keuangan'
+import { Route as PitchRouteImport } from './routes/pitch'
 import { Route as ImpianHajiIndexRouteImport } from './routes/impian-haji.index'
 import { Route as ImpianHajiRencanaRouteImport } from './routes/impian-haji.rencana'
 import { Route as ImpianHajiSiapDaftarRouteImport } from './routes/impian-haji.siap-daftar'
@@ -23,6 +24,11 @@ const IndexRoute = IndexRouteImport.update({
 const KeuanganRoute = KeuanganRouteImport.update({
   id: '/keuangan',
   path: '/keuangan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PitchRoute = PitchRouteImport.update({
+  id: '/pitch',
+  path: '/pitch',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ImpianHajiIndexRoute = ImpianHajiIndexRouteImport.update({
@@ -44,6 +50,7 @@ const ImpianHajiSiapDaftarRoute = ImpianHajiSiapDaftarRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/keuangan': typeof KeuanganRoute
+  '/pitch': typeof PitchRoute
   '/impian-haji/rencana': typeof ImpianHajiRencanaRoute
   '/impian-haji/siap-daftar': typeof ImpianHajiSiapDaftarRoute
   '/impian-haji/': typeof ImpianHajiIndexRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/keuangan': typeof KeuanganRoute
+  '/pitch': typeof PitchRoute
   '/impian-haji/rencana': typeof ImpianHajiRencanaRoute
   '/impian-haji/siap-daftar': typeof ImpianHajiSiapDaftarRoute
   '/impian-haji': typeof ImpianHajiIndexRoute
@@ -59,6 +67,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/keuangan': typeof KeuanganRoute
+  '/pitch': typeof PitchRoute
   '/impian-haji/rencana': typeof ImpianHajiRencanaRoute
   '/impian-haji/siap-daftar': typeof ImpianHajiSiapDaftarRoute
   '/impian-haji/': typeof ImpianHajiIndexRoute
@@ -68,6 +77,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/keuangan'
+    | '/pitch'
     | '/impian-haji/rencana'
     | '/impian-haji/siap-daftar'
     | '/impian-haji/'
@@ -75,6 +85,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/keuangan'
+    | '/pitch'
     | '/impian-haji/rencana'
     | '/impian-haji/siap-daftar'
     | '/impian-haji'
@@ -82,6 +93,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/keuangan'
+    | '/pitch'
     | '/impian-haji/rencana'
     | '/impian-haji/siap-daftar'
     | '/impian-haji/'
@@ -90,6 +102,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   KeuanganRoute: typeof KeuanganRoute
+  PitchRoute: typeof PitchRoute
   ImpianHajiRencanaRoute: typeof ImpianHajiRencanaRoute
   ImpianHajiSiapDaftarRoute: typeof ImpianHajiSiapDaftarRoute
   ImpianHajiIndexRoute: typeof ImpianHajiIndexRoute
@@ -109,6 +122,13 @@ declare module '@tanstack/react-router' {
       path: '/keuangan'
       fullPath: '/keuangan'
       preLoaderRoute: typeof KeuanganRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pitch': {
+      id: '/pitch'
+      path: '/pitch'
+      fullPath: '/pitch'
+      preLoaderRoute: typeof PitchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/impian-haji/': {
@@ -138,6 +158,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   KeuanganRoute: KeuanganRoute,
+  PitchRoute: PitchRoute,
   ImpianHajiRencanaRoute: ImpianHajiRencanaRoute,
   ImpianHajiSiapDaftarRoute: ImpianHajiSiapDaftarRoute,
   ImpianHajiIndexRoute: ImpianHajiIndexRoute,

@@ -9,7 +9,7 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { LayoutGroup, MotionConfig, motion } from "framer-motion";
+import { LayoutGroup, MotionConfig, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, type ReactNode } from "react";
 import { Toaster } from "sonner";
 
@@ -18,7 +18,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppProvider } from "@/lib/store";
 import { StepSheet } from "@/components/app/StepSheet";
 import { BottomNav } from "@/components/app/BottomNav";
-import { dur, easeOut } from "@/lib/motion";
+import { dur, easeOut, motionCss } from "@/lib/motion";
 
 function NotFoundComponent() {
   return (
@@ -83,7 +83,7 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="id">
       <head><HeadContent /></head>
-      <body><AppProvider>{children}</AppProvider><Scripts /></body>
+      <body style={motionCss}><AppProvider>{children}</AppProvider><Scripts /></body>
     </html>
   );
 }
@@ -91,25 +91,27 @@ function RootShell({ children }: { children: ReactNode }) {
 const depth = (p: string) => p.split("/").filter(Boolean).length;
 
 function RootComponent() {
+  const reduced = useReducedMotion();
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const prev = useRef(pathname);
   const dir = depth(pathname) < depth(prev.current) ? -1 : 1;
   useEffect(() => { prev.current = pathname; }, [pathname]);
   const showNav = pathname === "/" || pathname === "/keuangan" || pathname === "/impian-haji";
+  const isPitch = pathname === "/pitch";
 
   return (
     <QueryClientProvider client={queryClient}>
-      <MotionConfig reducedMotion="user">
-        <div className="flex min-h-screen items-center justify-center sm:py-6">
-          <div className="relative h-[100dvh] w-full overflow-hidden bg-background sm:h-[844px] sm:w-[390px] sm:rounded-[44px] sm:shadow-[var(--shadow-navy)]">
+      <MotionConfig reducedMotion="user" transition={{ duration: reduced ? 0 : dur.standard, ease: easeOut }}>
+        <div className={isPitch ? "h-dvh" : "flex min-h-screen items-center justify-center sm:py-6"}>
+          <div className={isPitch ? "relative h-dvh w-full overflow-hidden bg-background" : "relative h-[100dvh] w-full overflow-hidden bg-background sm:h-[844px] sm:w-[390px] sm:rounded-[44px] sm:shadow-[var(--shadow-navy)]"}>
             <LayoutGroup>
               <motion.div
                 key={pathname}
-                initial={{ opacity: 0, x: 24 * dir }}
+                initial={{ opacity: 0, x: isPitch ? 0 : 24 * dir }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: dur.emphasis, ease: easeOut }}
-                id="app-scroll" className="no-scrollbar h-full overflow-y-auto"
+                id="app-scroll" className={isPitch ? "h-full overflow-hidden" : "no-scrollbar h-full overflow-y-auto"}
               >
                 <Outlet />
               </motion.div>

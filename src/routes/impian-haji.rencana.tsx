@@ -1,10 +1,10 @@
 import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowLeft, Check, Lightbulb } from "lucide-react";
 import { useMemo, useState } from "react";
-import { mock, SETORAN_AWAL } from "@/data/mock";
+import { DEPOSIT_MIN, FIRST_DEPOSITS, WEEKLY_CHIPS, mock, SETORAN_AWAL } from "@/data/mock";
 import { estimasiSiapDaftar, formatBulan, formatRp } from "@/lib/estimate";
-import { dur, easeOut, press, spring } from "@/lib/motion";
+import { delay, dur, linear, phaseMs, easeOut, press, spring } from "@/lib/motion";
 import { useAppActions } from "@/lib/store";
 import { Money } from "@/components/app/primitives";
 
@@ -29,13 +29,14 @@ const WHO = [
   { id: "keluarga", label: "Bersama pasangan/keluarga", name: "Haji Bersama Keluarga" },
 ];
 const PROVINSI = ["DKI Jakarta", "Jawa Barat", "Jawa Tengah", "Jawa Timur", "Banten", "DI Yogyakarta", "Sumatera Utara", "Sumatera Barat", "Sulawesi Selatan", "Kalimantan Timur"];
-const CHIPS = [25_000, 50_000, 100_000, 150_000, 250_000];
-const FIRST = [10_000, 50_000, 100_000];
+const CHIPS = WEEKLY_CHIPS;
+const FIRST = FIRST_DEPOSITS;
 
 const monthsBetween = (a: Date, b: Date) => (b.getFullYear() - a.getFullYear()) * 12 + b.getMonth() - a.getMonth();
 const est = (saldo: number, perMinggu: number) => estimasiSiapDaftar(saldo, SETORAN_AWAL, perMinggu, mock.today);
 
 function Rencana() {
+  const reduced = useReducedMotion();
   const nav = useNavigate();
   const { setAppState } = useAppActions();
   const router = useRouter();
@@ -48,14 +49,14 @@ function Rencana() {
   const [existing, setExisting] = useState(0);
   const [auto, setAuto] = useState(true);
   const [lock, setLock] = useState(true);
-  const [first, setFirst] = useState(FIRST[0]!);
+  const [first, setFirst] = useState(FIRST[0] ?? DEPOSIT_MIN);
   const [phase, setPhase] = useState<"idle" | "loading" | "done" | "celebrate">("idle");
 
-  const valid = [!!who, !!prov, weekly >= 10_000, true][step];
+  const valid = [!!who, !!prov, weekly >= DEPOSIT_MIN, true][step];
   const go = (d: number) => { setDir(d); setStep((s) => s + d); };
   const back = () => (step === 0 ? router.history.back() : go(-1));
 
-  const date = weekly >= 10_000 ? est(existing, weekly) : null;
+  const date = weekly >= DEPOSIT_MIN ? est(existing, weekly) : null;
   const months = date ? monthsBetween(mock.today, date) : 0;
   const ageThen = age + Math.floor(months / 12);
   const suggestion = useMemo(() => {
@@ -67,12 +68,12 @@ function Rencana() {
 
   const finish = () => {
     setPhase("loading");
-    setTimeout(() => setPhase("done"), 500);
-    setTimeout(() => setPhase("celebrate"), 800);
+    setTimeout(() => setPhase("done"), phaseMs.done);
+    setTimeout(() => setPhase("celebrate"), phaseMs.celebrate);
     setTimeout(() => {
       setAppState({ userState: "aktif", haji: { name: whoObj?.name ?? "Impian Haji", saldo: existing + first, target: SETORAN_AWAL, setoranPerMinggu: weekly }, autoOn: auto, lockOn: lock });
       nav({ to: "/impian-haji" });
-    }, 2600);
+    }, phaseMs.finish);
   };
 
   return (
@@ -124,7 +125,7 @@ function Rencana() {
                   <div className="card-soft mt-6 space-y-6 p-5 text-card-foreground">
                     <div>
                       <div className="flex justify-between text-sm font-medium"><span>Usia</span><span className="tabular text-primary">{age} tahun</span></div>
-                      <input type="range" min={18} max={60} value={age} onChange={(e) => setAge(+e.target.value)} className="mt-3 w-full accent-[var(--primary)]" aria-label="Usia" />
+                      <input type="range" min={18} max={60} value={age} onChange={(e) => setAge(+e.target.value)} className="mt-3 min-h-11 w-full accent-[var(--primary)]" aria-label="Usia" />
                     </div>
                     <div>
                       <label htmlFor="prov" className="text-sm font-medium">Domisili (provinsi)</label>
@@ -157,7 +158,7 @@ function Rencana() {
                       <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }} transition={spring}
                         className="mt-4 rounded-3xl bg-profit p-4 text-mint-foreground">
                         <div className="flex gap-2 text-sm"><Lightbulb size={20} strokeWidth={1.75} className="shrink-0" />
-                          <p>Dengan {formatRp(weekly)}/minggu, target tercapai {date!.getFullYear()}. Coba {formatRp(suggestion.y)}/minggu → siap daftar {suggestion.date.getFullYear()}.</p>
+                          <p>Dengan {formatRp(weekly)}/minggu, target tercapai {date?.getFullYear()}. Coba {formatRp(suggestion.y)}/minggu → siap daftar {suggestion.date.getFullYear()}.</p>
                         </div>
                         <motion.button {...press} onClick={() => setWeekly(suggestion.y)} className="mt-3 h-11 w-full rounded-full bg-navy text-sm font-semibold text-primary-foreground">Pakai saran ini</motion.button>
                       </motion.div>
@@ -171,7 +172,7 @@ function Rencana() {
                           className={`tabular h-11 rounded-full px-4 text-xs font-medium ${weekly === c ? "bg-primary text-primary-foreground" : "bg-surface"}`}>{formatRp(c)}</motion.button>
                       ))}
                     </div>
-                    <label className="mt-4 block text-xs font-medium text-muted-foreground">Nominal lain (min. Rp10.000)
+                    <label className="mt-4 block text-xs font-medium text-muted-foreground">Nominal lain (min. {formatRp(DEPOSIT_MIN)})
                       <input inputMode="numeric" value={weekly ? weekly.toLocaleString("id-ID") : ""} placeholder="Rp0"
                         onChange={(e) => setWeekly(+e.target.value.replace(/\D/g, "") || 0)} className="tabular mt-1 h-12 w-full rounded-2xl border bg-surface px-4 text-sm text-foreground" />
                     </label>
@@ -219,7 +220,7 @@ function Rencana() {
             <motion.button layout {...press} disabled={phase !== "idle"} onClick={finish} transition={spring}
               className={`flex h-12 items-center justify-center rounded-full bg-mint text-sm font-semibold text-mint-foreground ${phase === "idle" ? "w-full" : "w-12"}`}>
               {phase === "idle" && "Ambil STEP Pertamaku"}
-              {phase === "loading" && <motion.span className="h-5 w-5 rounded-full border-2 border-mint-foreground border-t-transparent" animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.6, ease: "linear" }} />}
+              {phase === "loading" && <motion.span className="h-5 w-5 rounded-full border-2 border-mint-foreground border-t-transparent" animate={{ rotate: 360 }} transition={{ duration: reduced ? 0 : dur.loading, ease: linear }} />}
               {(phase === "done" || phase === "celebrate") && <Check size={22} strokeWidth={2.5} />}
             </motion.button>
           )}
@@ -234,7 +235,7 @@ function Rencana() {
               <motion.span className="h-6 w-6 rounded-full bg-mint shadow-[var(--shadow-glow)]" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={spring} />
             </div>
             <Money value={existing + first} className="mt-4 text-[36px] font-semibold" />
-            <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: dur.standard, ease: easeOut }} className="mt-3 text-base">
+            <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: delay.roll, duration: dur.standard, ease: easeOut }} className="mt-3 text-base">
               Langkah pertama tercatat. Kamu sudah di jalur.
             </motion.p>
           </motion.div>
@@ -246,7 +247,7 @@ function Rencana() {
 
 function Toggle({ on, set, label, note }: { on: boolean; set: (v: boolean) => void; label: string; note?: string }) {
   return (
-    <button type="button" role="switch" aria-checked={on} onClick={() => set(!on)} className="flex w-full items-start justify-between gap-4 text-left">
+    <button type="button" role="switch" aria-checked={on} onClick={() => set(!on)} className="flex min-h-11 w-full items-start justify-between gap-4 text-left">
       <span>
         <span className="block text-sm font-medium">{label}</span>
         {note && <span className="mt-1 block text-xs text-muted-foreground">{note}</span>}

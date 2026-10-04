@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowLeft, FileCheck2, Landmark, Sparkles, Wallet, BadgeCheck } from "lucide-react";
-import { mock } from "@/data/mock";
+import { mock, SETORAN_AWAL } from "@/data/mock";
 import { estimasiSiapDaftar, formatBulan, formatRp } from "@/lib/estimate";
-import { dur, easeOut, press, spring } from "@/lib/motion";
+import { delay, dur, easeOut, press, spring } from "@/lib/motion";
 import { useAppState, useAppActions } from "@/lib/store";
 
 export const Route = createFileRoute("/impian-haji/siap-daftar")({
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/impian-haji/siap-daftar")({
 });
 
 const STEPS = [
-  { icon: Wallet, title: "Saldo mencapai setoran awal", desc: `Saldo Ala Impian Haji mencapai setoran awal ${formatRp(25_000_000)}.` },
+  { icon: Wallet, title: "Saldo mencapai setoran awal", desc: `Saldo Ala Impian Haji mencapai setoran awal ${formatRp(SETORAN_AWAL)}.` },
   { icon: FileCheck2, title: "Siapkan dokumen", desc: "Siapkan dokumen sesuai ketentuan Kemenag." },
   { icon: Landmark, title: "Datang ke Kantor Kemenag", desc: "Datang ke Kantor Kemenag kabupaten/kota sesuai domisili untuk mendaftar." },
   { icon: BadgeCheck, title: "Dapatkan nomor porsi", desc: "Nomor porsi tercatat di SISKOHAT. Antreanmu dimulai." },
@@ -55,7 +55,7 @@ function SiapDaftar() {
         <motion.div
           initial={reduced ? false : { opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: dur.standard, ease: easeOut, delay: 0.08 }}
+          transition={{ duration: dur.standard, ease: easeOut, delay: delay.short }}
           className="card-navy mt-5 overflow-hidden p-5 text-primary-foreground"
         >
           <div className="islamic-pattern pointer-events-none absolute inset-0" />
@@ -80,9 +80,9 @@ function SiapDaftar() {
         <motion.ol
           initial={reduced ? false : "hidden"}
           animate="show"
-          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.28, delayChildren: 0.25 } } }}
+          variants={{ hidden: {}, show: { transition: { staggerChildren: delay.step, delayChildren: dur.standard } } }}
           className="relative mt-8"
-          aria-label="Timeline 4 langkah setelah setoran awal"
+          aria-label="Alur empat langkah setelah setoran awal"
         >
           {/* vertical path drawn top → bottom */}
           <svg aria-hidden className="pointer-events-none absolute left-[27px] top-2 h-[calc(100%-16px)] w-[3px]" preserveAspectRatio="none" viewBox="0 0 3 100">
@@ -92,7 +92,7 @@ function SiapDaftar() {
                 x1="1.5" y1="0" x2="1.5" y2="100"
                 stroke="var(--mint)" strokeWidth="3" strokeLinecap="round" vectorEffect="non-scaling-stroke"
                 initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
-                transition={{ duration: 1.4, ease: easeOut, delay: 0.3 }}
+                transition={{ duration: dur.timeline, ease: easeOut, delay: delay.path }}
               />
             )}
             {reduced && <line x1="1.5" y1="0" x2="1.5" y2="100" stroke="var(--mint)" strokeWidth="3" />}
@@ -119,7 +119,7 @@ function SiapDaftar() {
                       aria-hidden
                       className="absolute inset-0 rounded-full border-2 border-mint"
                       animate={{ scale: [1, 1.18, 1], opacity: [0.5, 0, 0.5] }}
-                      transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+                      transition={{ duration: dur.celebrate, ease: easeOut }}
                     />
                   )}
                 </span>
@@ -136,7 +136,7 @@ function SiapDaftar() {
         <motion.p
           initial={reduced ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.6, duration: dur.standard }}
+          transition={{ delay: reduced ? 0 : delay.notice, duration: dur.standard }}
           className="mt-2 rounded-2xl bg-muted px-4 py-3 text-xs leading-relaxed text-muted-foreground"
         >
           Persyaratan dan alur dapat berubah. Selalu cek ketentuan terbaru di Kemenag.

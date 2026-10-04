@@ -79,7 +79,7 @@ function Keuangan() {
                 <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-navy text-primary-foreground"><Kaaba className="h-7 w-7" /></span>
                 <div className="flex-1">
                   <p className="text-base font-semibold">Ala Impian Haji</p>
-                  <p className="text-xs text-muted-foreground">Dengan Partner BPKH</p>
+                  <p className="text-xs text-muted-foreground">Dengan Mitra BPKH</p>
                 </div>
                 <ChevronRight size={20} strokeWidth={1.75} className="text-muted-foreground" />
               </div>
@@ -102,7 +102,7 @@ function Keuangan() {
             <motion.button {...staggerChild} {...press} onClick={notInPrototype} className="flex w-full items-center justify-between rounded-3xl bg-accent p-5 text-left">
               <div>
                 <p className="text-base font-semibold">Ala Deposito</p>
-                <p className="mt-1 text-xs font-medium text-profit">Bagi hasil 8,5% p.a.*</p>
+                <p className="mt-1 text-xs font-medium text-profit-ink">Bagi hasil {mock.products.find(p => p.id === "deposito")?.badge} per tahun*</p>
               </div>
               <Landmark size={32} strokeWidth={1.5} className="text-navy" />
             </motion.button>

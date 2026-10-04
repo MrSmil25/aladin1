@@ -10,3 +10,5 @@ export function estimasiSiapDaftar(saldo: number, target: number, setoranPerMing
 
 export const formatBulan = (d: Date) => `${BULAN[d.getMonth()]} ${d.getFullYear()}`;
 export const formatRp = (n: number) => "Rp" + Math.round(n).toLocaleString("id-ID");
+export const formatPercent = (n: number) => `${Math.max(0, Math.min(100, n)).toLocaleString("id-ID", { maximumFractionDigits: 2 })}%`;
+export const formatTanggal = (d: Date) => `${d.getDate()} ${formatBulan(d)}`;
