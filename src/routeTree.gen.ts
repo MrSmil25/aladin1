@@ -10,33 +10,89 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as KeuanganRouteImport } from './routes/keuangan'
+import { Route as ImpianHajiIndexRouteImport } from './routes/impian-haji.index'
+import { Route as ImpianHajiRencanaRouteImport } from './routes/impian-haji.rencana'
+import { Route as ImpianHajiSiapDaftarRouteImport } from './routes/impian-haji.siap-daftar'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KeuanganRoute = KeuanganRouteImport.update({
+  id: '/keuangan',
+  path: '/keuangan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImpianHajiIndexRoute = ImpianHajiIndexRouteImport.update({
+  id: '/impian-haji/',
+  path: '/impian-haji/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImpianHajiRencanaRoute = ImpianHajiRencanaRouteImport.update({
+  id: '/impian-haji/rencana',
+  path: '/impian-haji/rencana',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImpianHajiSiapDaftarRoute = ImpianHajiSiapDaftarRouteImport.update({
+  id: '/impian-haji/siap-daftar',
+  path: '/impian-haji/siap-daftar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/keuangan': typeof KeuanganRoute
+  '/impian-haji/rencana': typeof ImpianHajiRencanaRoute
+  '/impian-haji/siap-daftar': typeof ImpianHajiSiapDaftarRoute
+  '/impian-haji/': typeof ImpianHajiIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/keuangan': typeof KeuanganRoute
+  '/impian-haji/rencana': typeof ImpianHajiRencanaRoute
+  '/impian-haji/siap-daftar': typeof ImpianHajiSiapDaftarRoute
+  '/impian-haji': typeof ImpianHajiIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/keuangan': typeof KeuanganRoute
+  '/impian-haji/rencana': typeof ImpianHajiRencanaRoute
+  '/impian-haji/siap-daftar': typeof ImpianHajiSiapDaftarRoute
+  '/impian-haji/': typeof ImpianHajiIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/keuangan'
+    | '/impian-haji/rencana'
+    | '/impian-haji/siap-daftar'
+    | '/impian-haji/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/keuangan'
+    | '/impian-haji/rencana'
+    | '/impian-haji/siap-daftar'
+    | '/impian-haji'
+  id:
+    | '__root__'
+    | '/'
+    | '/keuangan'
+    | '/impian-haji/rencana'
+    | '/impian-haji/siap-daftar'
+    | '/impian-haji/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  KeuanganRoute: typeof KeuanganRoute
+  ImpianHajiRencanaRoute: typeof ImpianHajiRencanaRoute
+  ImpianHajiSiapDaftarRoute: typeof ImpianHajiSiapDaftarRoute
+  ImpianHajiIndexRoute: typeof ImpianHajiIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +104,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/keuangan': {
+      id: '/keuangan'
+      path: '/keuangan'
+      fullPath: '/keuangan'
+      preLoaderRoute: typeof KeuanganRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/impian-haji/': {
+      id: '/impian-haji/'
+      path: '/impian-haji'
+      fullPath: '/impian-haji/'
+      preLoaderRoute: typeof ImpianHajiIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/impian-haji/rencana': {
+      id: '/impian-haji/rencana'
+      path: '/impian-haji/rencana'
+      fullPath: '/impian-haji/rencana'
+      preLoaderRoute: typeof ImpianHajiRencanaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/impian-haji/siap-daftar': {
+      id: '/impian-haji/siap-daftar'
+      path: '/impian-haji/siap-daftar'
+      fullPath: '/impian-haji/siap-daftar'
+      preLoaderRoute: typeof ImpianHajiSiapDaftarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  KeuanganRoute: KeuanganRoute,
+  ImpianHajiRencanaRoute: ImpianHajiRencanaRoute,
+  ImpianHajiSiapDaftarRoute: ImpianHajiSiapDaftarRoute,
+  ImpianHajiIndexRoute: ImpianHajiIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
