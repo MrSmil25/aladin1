@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronDown, ChevronRight, Footprints } from "lucide-react";
 import { useState } from "react";
-import { mock } from "@/data/mock";
+import { DEPOSIT_MIN, mock } from "@/data/mock";
 import { useAppState, useAppActions } from "@/lib/store";
 import { estimasiSiapDaftar, formatBulan, formatRp } from "@/lib/estimate";
 import { delay, dur, easeInOut, easeOut, press, spring } from "@/lib/motion";
@@ -54,7 +54,7 @@ export function HajjCard({ first }: { first: boolean }) {
                     <Kaaba className="h-11 w-11" />
                   </motion.div>
                   <h2 className="text-xl font-semibold">Kapan kamu bisa daftar haji?</h2>
-                  <p className="mt-1 text-sm text-primary-foreground/70">Hitung rencanamu dalam 30 detik. Mulai dari Rp10.000.</p>
+                  <p className="mt-1 text-sm text-primary-foreground/70">Hitung rencanamu dalam 30 detik. Mulai dari {formatRp(DEPOSIT_MIN)}.</p>
                   <motion.div animate={reduce ? {} : { scale: [1, 1.04, 1] }} transition={{ delay: delay.settle, duration: dur.celebrate }} className="mt-5">
                     <Link to="/impian-haji/rencana" className="flex h-12 items-center justify-center rounded-full bg-mint text-sm font-semibold text-mint-foreground">Hitung Rencana Hajiku</Link>
                   </motion.div>

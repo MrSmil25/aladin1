@@ -53,7 +53,7 @@ function Beranda() {
           <span key={i} className="star absolute h-0.5 w-0.5 rounded-full bg-primary-foreground" style={{ left: `${s.l}%`, top: `${s.t}%`, animationDelay: `${s.d}s` }} />
         ))}
         <div className="relative flex items-center justify-between px-5 pt-10">
-          <span className="text-2xl font-bold italic tracking-tight text-primary-foreground">Aladin</span>
+          <span className="text-2xl font-bold italic text-primary-foreground">Aladin</span>
           <div className="flex gap-1 text-primary-foreground">
             <button onClick={notInPrototype} aria-label="Notifikasi" className="flex h-11 w-11 items-center justify-center"><Bell size={24} strokeWidth={1.75} /></button>
             <button onClick={notInPrototype} aria-label="Profil" className="flex h-11 w-11 items-center justify-center"><User size={24} strokeWidth={1.75} /></button>

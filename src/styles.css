@@ -82,6 +82,7 @@
 
 @layer base {
   * { border-color: var(--color-border); }
+  button, [role="switch"] { min-height: 44px; min-width: 44px; }
   body {
     background-color: var(--color-stage);
     color: var(--color-foreground);
@@ -137,7 +138,7 @@
 @media (max-width: 767px) {
   .pitch-heading { font-size: 38px; }
   .pitch-subheading { font-size: 30px; }
-  .pitch-comparison { gap: 24px; }
+  .pitch-comparison { gap: 16px; }
   .pitch-phone { max-width: 245px; }
 }
 @media (max-height: 740px) and (max-width: 767px) {

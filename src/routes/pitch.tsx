@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AnimatePresence, motion, useInView, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { ArrowDown, ArrowRight, Check, Footprints, Lightbulb, Sparkles } from "lucide-react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Kaaba, Money, Progress } from "@/components/app/primitives";
@@ -28,13 +28,13 @@ function Scene({ children, index, dark = false }: { children: ReactNode; index: 
   </section>;
 }
 
-function Phone({ children, container, after = false }: { children: ReactNode; container: React.RefObject<HTMLDivElement | null>; after?: boolean }) {
+function Phone({ children, container, after = false }: { children: ReactNode; container: RefObject<HTMLDivElement | null>; after?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, container, offset: ["start end", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], [28, -28]);
   const rotate = useTransform(scrollYProgress, [0, 1], after ? [4, -2] : [-4, 2]);
-  return <motion.div ref={ref} style={reduce ? undefined : { y, rotate }} className="pitch-phone mx-auto relative w-full max-w-[280px] rounded-[32px] border-[7px] border-navy-deep bg-background p-4 text-foreground shadow-[var(--shadow-navy)]">
+  return <motion.div ref={ref} style={reduce ? {} : { y, rotate }} className="pitch-phone mx-auto relative w-full max-w-[280px] rounded-[32px] border-[7px] border-navy-deep bg-background p-4 text-foreground shadow-[var(--shadow-navy)]">
     <div className="mx-auto mb-5 h-1 w-16 rounded-full bg-navy-deep" />{children}
   </motion.div>;
 }
@@ -107,7 +107,7 @@ function Pitch() {
         <p aria-live="polite" className="mt-3 text-sm text-primary-foreground/80">{recorded ? "Langkah tercatat. Saldo prototipe ikut diperbarui." : `Dari Ala Dompet · ${formatRp(state.dompet.saldo)}`}</p>
       </Scene>
       <Scene index={5} dark>
-        <Sparkles className="mb-7 text-mint" size={40} /><p className="text-base font-medium text-mint sm:text-xl">Ala Impian Haji · STEP</p><h2 className="pitch-heading mt-5 max-w-4xl font-semibold">Satu Langkah,<br /><span className="text-mint">Lebih Dekat.</span></h2><Button asChild className="mt-8 min-h-12 bg-mint px-6 text-mint-foreground hover:bg-mint/90"><Link to="/">Buka prototype<ArrowRight /></Link></Button>
+        <Sparkles className="mb-7 text-mint" size={40} /><p className="text-base font-medium text-mint sm:text-xl">Ala Impian Haji · STEP</p><h2 className="pitch-heading mt-5 max-w-4xl font-semibold">Satu Langkah,<br /><span className="text-mint">Lebih Dekat.</span></h2><Button asChild className="mt-8 min-h-12 bg-mint px-6 text-mint-foreground hover:bg-mint/90"><Link to="/">Buka prototipe<ArrowRight /></Link></Button>
       </Scene>
     </div>
     <footer className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-center justify-between px-6 py-4 text-[10px] sm:px-16 ${active === 1 || active === 4 || active === 5 ? "text-primary-foreground/80" : "text-muted-foreground"}`}><span>Prototipe konsep — data ilustrasi</span><span>Ala Impian Haji · STEP</span></footer>

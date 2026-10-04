@@ -9,7 +9,7 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { LayoutGroup, MotionConfig, motion } from "framer-motion";
+import { LayoutGroup, MotionConfig, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, type ReactNode } from "react";
 import { Toaster } from "sonner";
 
@@ -91,6 +91,7 @@ function RootShell({ children }: { children: ReactNode }) {
 const depth = (p: string) => p.split("/").filter(Boolean).length;
 
 function RootComponent() {
+  const reduced = useReducedMotion();
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const prev = useRef(pathname);
@@ -101,7 +102,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <MotionConfig reducedMotion="user">
+      <MotionConfig reducedMotion="user" transition={{ duration: reduced ? 0 : dur.standard, ease: easeOut }}>
         <div className={isPitch ? "h-dvh" : "flex min-h-screen items-center justify-center sm:py-6"}>
           <div className={isPitch ? "relative h-dvh w-full overflow-hidden bg-background" : "relative h-[100dvh] w-full overflow-hidden bg-background sm:h-[844px] sm:w-[390px] sm:rounded-[44px] sm:shadow-[var(--shadow-navy)]"}>
             <LayoutGroup>

@@ -172,7 +172,7 @@ function Rencana() {
                           className={`tabular h-11 rounded-full px-4 text-xs font-medium ${weekly === c ? "bg-primary text-primary-foreground" : "bg-surface"}`}>{formatRp(c)}</motion.button>
                       ))}
                     </div>
-                    <label className="mt-4 block text-xs font-medium text-muted-foreground">Nominal lain (min. Rp10.000)
+                    <label className="mt-4 block text-xs font-medium text-muted-foreground">Nominal lain (min. {formatRp(DEPOSIT_MIN)})
                       <input inputMode="numeric" value={weekly ? weekly.toLocaleString("id-ID") : ""} placeholder="Rp0"
                         onChange={(e) => setWeekly(+e.target.value.replace(/\D/g, "") || 0)} className="tabular mt-1 h-12 w-full rounded-2xl border bg-surface px-4 text-sm text-foreground" />
                     </label>
