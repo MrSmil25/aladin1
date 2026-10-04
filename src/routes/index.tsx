@@ -14,6 +14,8 @@ import { Kaaba, Money, Skeleton, notInPrototype, useFirstLoad } from "@/componen
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Beranda · Aladin Impian Haji" },
       { name: "description", content: "Beranda app Aladin dengan kartu Perjalanan Hajimu dan program STEP." },
       { property: "og:title", content: "Beranda · Aladin Impian Haji" },
@@ -73,7 +75,7 @@ function Beranda() {
                 <button onClick={() => nav({ to: "/keuangan" })} className="text-primary">Detail</button>
               </div>
               <div className="mt-1 flex items-center gap-2">
-                {show ? <Money value={mock.dompet.saldo} className="text-xl font-semibold" /> : <span className="text-xl font-semibold tracking-widest">Rp•••••••</span>}
+                {show ? <Money value={app.dompet.saldo} className="text-xl font-semibold" /> : <span className="text-xl font-semibold tracking-widest">Rp•••••••</span>}
                 <button onClick={() => setShow(!show)} aria-label="Tampilkan saldo" className="flex h-11 w-11 items-center justify-center text-muted-foreground">
                   {show ? <EyeOff size={20} strokeWidth={1.75} /> : <Eye size={20} strokeWidth={1.75} />}
                 </button>

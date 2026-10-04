@@ -15,6 +15,8 @@ import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { AppProvider } from "@/lib/store";
+import { StepSheet } from "@/components/app/StepSheet";
 import { BottomNav } from "@/components/app/BottomNav";
 import { dur, easeOut } from "@/lib/motion";
 
@@ -98,7 +100,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <MotionConfig reducedMotion="user">
+      <AppProvider><MotionConfig reducedMotion="user">
         <div className="flex min-h-screen items-center justify-center sm:py-6">
           <div className="relative h-[100dvh] w-full overflow-hidden bg-background sm:h-[844px] sm:w-[390px] sm:rounded-[44px] sm:shadow-[var(--shadow-navy)]">
             <LayoutGroup>
@@ -114,10 +116,11 @@ function RootComponent() {
             </LayoutGroup>
             {showNav && <BottomNav />}
             <div id="sheet-root" />
+            <StepSheet />
             <Toaster position="top-center" toastOptions={{ className: "font-sans" }} style={{ position: "absolute" }} />
           </div>
         </div>
-      </MotionConfig>
+      </MotionConfig></AppProvider>
     </QueryClientProvider>
   );
 }

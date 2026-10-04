@@ -5,12 +5,14 @@ import { useMemo, useState } from "react";
 import { mock, SETORAN_AWAL } from "@/data/mock";
 import { estimasiSiapDaftar, formatBulan, formatRp } from "@/lib/estimate";
 import { dur, easeOut, press, spring } from "@/lib/motion";
-import { setAppState } from "@/lib/store";
+import { useAppActions } from "@/lib/store";
 import { Money } from "@/components/app/primitives";
 
 export const Route = createFileRoute("/impian-haji/rencana")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Rencana Haji · Aladin" },
       { name: "description", content: "Susun rencana tabungan haji yang realistis dalam 4 langkah." },
       { property: "og:title", content: "Rencana Haji · Aladin" },
@@ -35,6 +37,7 @@ const est = (saldo: number, perMinggu: number) => estimasiSiapDaftar(saldo, SETO
 
 function Rencana() {
   const nav = useNavigate();
+  const { setAppState } = useAppActions();
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [dir, setDir] = useState(1);
@@ -67,7 +70,7 @@ function Rencana() {
     setTimeout(() => setPhase("done"), 500);
     setTimeout(() => setPhase("celebrate"), 800);
     setTimeout(() => {
-      setAppState({ userState: "aktif", haji: { name: whoObj?.name ?? "Impian Haji", saldo: existing + first, target: SETORAN_AWAL, setoranPerMinggu: weekly } });
+      setAppState({ userState: "aktif", haji: { name: whoObj?.name ?? "Impian Haji", saldo: existing + first, target: SETORAN_AWAL, setoranPerMinggu: weekly }, autoOn: auto, lockOn: lock });
       nav({ to: "/impian-haji" });
     }, 2600);
   };

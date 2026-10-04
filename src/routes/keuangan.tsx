@@ -11,6 +11,8 @@ import { Kaaba, Money, Progress, Skeleton, notInPrototype, useFirstLoad } from "
 export const Route = createFileRoute("/keuangan")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Keuangan Saya · Aladin" },
       { name: "description", content: "Ringkasan simpanan: Ala Dompet dan Ala Impian Haji." },
       { property: "og:title", content: "Keuangan Saya · Aladin" },
@@ -57,7 +59,7 @@ function Keuangan() {
               </div>
               <div className="card-soft flex items-center justify-between p-5">
                 <span className="text-sm text-muted-foreground">Total saldo (IDR)</span>
-                {show ? <Money value={mock.dompet.saldo + h.saldo} className="text-base font-semibold" /> : <Hidden />}
+                {show ? <Money value={app.dompet.saldo + h.saldo} className="text-base font-semibold" /> : <Hidden />}
               </div>
             </motion.div>
 
@@ -68,7 +70,7 @@ function Keuangan() {
               </div>
               <div className="mt-4 flex justify-between">
                 <span className="text-sm text-muted-foreground">Saldo aktif</span>
-                {show ? <Money value={mock.dompet.saldo} className="text-base font-semibold" /> : <Hidden />}
+                {show ? <Money value={app.dompet.saldo} className="text-base font-semibold" /> : <Hidden />}
               </div>
             </motion.div>
 

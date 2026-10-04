@@ -4,6 +4,8 @@ import { ArrowLeft } from "lucide-react";
 export const Route = createFileRoute("/impian-haji/siap-daftar")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Siap Daftar SISKOHAT · Aladin" },
       { name: "description", content: "Apa yang terjadi saat tabungan hajimu mencapai Rp25 juta." },
       { property: "og:title", content: "Siap Daftar SISKOHAT · Aladin" },

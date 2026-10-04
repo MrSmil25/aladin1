@@ -6,15 +6,18 @@ import {
 import { useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { mock } from "@/data/mock";
-import { useAppState } from "@/lib/store";
+import { useAppState, useAppActions } from "@/lib/store";
 import { estimasiSiapDaftar, formatBulan, formatRp } from "@/lib/estimate";
 import { dur, easeOut, press, spring } from "@/lib/motion";
 import { Kaaba, Money, Progress, notInPrototype } from "@/components/app/primitives";
+import { Button } from "@/components/ui/button";
 import { Portal, Sheet } from "@/components/app/Sheet";
 
 export const Route = createFileRoute("/impian-haji/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Impian Haji · Aladin" },
       { name: "description", content: "Pusat Ala Impian Haji: jalur STEP, nabung rutin, bagi hasil, dan progresmu." },
       { property: "og:title", content: "Impian Haji · Aladin" },
@@ -35,6 +38,7 @@ const inView = {
 
 function ImpianHaji() {
   const app = useAppState();
+  const { openStep } = useAppActions();
   const nav = useNavigate();
   const h = { ...mock.haji, ...app.haji };
   const ms = mock.haji.milestones;
@@ -45,17 +49,18 @@ function ImpianHaji() {
   // current position on the path
   const reached = ms.filter((m) => m.amount <= h.saldo).length - 1;
   const nextM = ms[reached + 1];
-  const frac = nextM ? (h.saldo - ms[reached]!.amount) / (nextM.amount - ms[reached]!.amount) : 0;
+  const currentM = ms[Math.max(0, reached)];
+  const frac = nextM && currentM ? (h.saldo - currentM.amount) / (nextM.amount - currentM.amount) : 0;
   const posY = (reached + frac) * ROW;
   const total = (ms.length - 1) * ROW;
 
   const [menu, setMenu] = useState(false);
   const [sheet, setSheet] = useState<null | "save" | "transact" | "earn" | number>(null);
-  const [weekly, setWeekly] = useState(h.setoranPerMinggu);
-  const [autoOn, setAutoOn] = useState(true);
-  const [lockOn, setLockOn] = useState(true);
+  const weekly = h.setoranPerMinggu;
+  const { autoOn, lockOn } = app;
   const [coach, setCoach] = useState(-1);
   const [joined, setJoined] = useState(false);
+  const selectedM = typeof sheet === "number" ? ms[sheet] : undefined;
 
   // parallax pattern
   const py = useMotionValue(0);
@@ -80,7 +85,7 @@ function ImpianHaji() {
     { id: "next-step", text: "Ambil langkah di sini" },
     { id: "earn-card", text: "Bagi hasilmu tumbuh di sini" },
   ];
-  useEffect(() => { if (coach >= 0) scrollTo(coaches[coach]!.id); }, [coach]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (coach >= 0) scrollTo(coaches[coach]?.id ?? "jalur"); }, [coach]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const extra = h.setoranPerMinggu * 2;
   const share = async () => {
@@ -125,6 +130,7 @@ function ImpianHaji() {
             </div>
             <motion.div layoutId="hajj-kaaba"><Kaaba className="h-16 w-16" /></motion.div>
           </div>
+          <Button onClick={() => openStep()} className="mt-4 h-11 w-full rounded-full bg-mint text-mint-foreground hover:bg-mint/90">Ambil STEP</Button>
           <div className="mt-5"><Progress pct={pct} layoutId="hajj-progress" track="bg-primary-foreground/15" /></div>
           <div className="mt-3 flex justify-between text-xs">
             <span className="tabular font-medium text-mint">{Math.floor(pct)}% lebih dekat</span>
@@ -143,7 +149,7 @@ function ImpianHaji() {
             <div className="relative mt-5" style={{ height: total + 40 }}>
               <svg className="absolute left-0 top-0" width="40" height={total + 40} aria-hidden>
                 <line x1="20" y1="20" x2="20" y2={total + 20} stroke="var(--border)" strokeWidth="4" strokeLinecap="round" style={{ stroke: "oklch(0.21 0.04 265 / 12%)" }} />
-                <motion.line x1="20" y1="20" x2="20" y2={20 + posY} stroke="var(--mint)" strokeWidth="4" strokeLinecap="round"
+                <motion.line x1="20" y1="20" x2="20" animate={{ y2: 20 + posY }} stroke="var(--mint)" strokeWidth="4" strokeLinecap="round"
                   initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: dur.emphasis * 2, ease: easeOut }} />
               </svg>
               {ms.map((m, i) => {
@@ -188,17 +194,17 @@ function ImpianHaji() {
               <p className="text-xs font-medium text-muted-foreground">STEP berikutnya</p>
               <p className="text-sm font-semibold">Setor {formatRp(extra)} hari ini → {nextM.name} 2 minggu lebih cepat</p>
             </div>
-            <motion.button {...press} onClick={notInPrototype} className="h-11 shrink-0 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground">Ambil STEP</motion.button>
+            <Button onClick={() => openStep()} className="h-11 shrink-0 rounded-full px-4">Ambil STEP</Button>
           </motion.section>
         )}
 
         {/* 4) EMPAT KARTU STEP */}
         <div className="grid grid-cols-2 gap-3">
-          <StepCard tag="S · Save" title="Nabung Rutin" onClick={() => setSheet("save")}>
+          <StepCard tag="S · Save" title="Nabung Rutin" onClick={() => openStep("save")}>
             <p className="tabular">Otomatis tiap Jumat · {formatRp(weekly)} · <span className="text-mint-foreground">{autoOn ? "Aktif" : "Nonaktif"}</span></p>
             <p className="mt-1">Kunci Ala Impian · {lockOn ? "Aktif" : "Nonaktif"}</p>
           </StepCard>
-          <StepCard tag="T · Transact" title="Cara Setor" onClick={() => setSheet("transact")}>
+          <StepCard tag="T · Transact" title="Cara Setor" onClick={() => openStep("transact")}>
             <p>Dari Ala Dompet (gratis)</p>
             <p className="mt-1">Tunai di kasir Alfamart/Alfamidi</p>
           </StepCard>
@@ -296,11 +302,11 @@ function ImpianHaji() {
           {h.saldo === 0 ? (
             <div className="card-soft p-6 text-center">
               <p className="text-sm font-semibold">Langkah pertama cukup Rp10.000.</p>
-              <motion.button {...press} onClick={notInPrototype} className="mt-4 h-11 w-full rounded-full bg-primary text-sm font-semibold text-primary-foreground">Setor sekarang</motion.button>
+              <motion.button {...press} onClick={() => openStep("deposit")} className="mt-4 h-11 w-full rounded-full bg-primary text-sm font-semibold text-primary-foreground">Setor sekarang</motion.button>
             </div>
           ) : (
             <div className="card-soft divide-y px-5">
-              {mock.riwayat.map((r, i) => (
+              {[...app.deposits, ...mock.riwayat].map((r, i) => (
                 <div key={i} className="flex items-center justify-between py-3.5">
                   <div><p className="text-sm font-medium">{r.label}</p><p className="text-xs text-muted-foreground">{r.date}</p></div>
                   <span className={`tabular text-sm font-semibold ${r.label === "Bagi hasil" ? "text-profit" : ""}`}>+{formatRp(r.amount)}</span>
@@ -318,35 +324,17 @@ function ImpianHaji() {
       </div>
 
       {/* Sheets */}
-      <Sheet open={typeof sheet === "number"} onClose={() => setSheet(null)} title={typeof sheet === "number" ? ms[sheet]!.name : ""}>
-        {typeof sheet === "number" && (
+      <Sheet open={typeof sheet === "number"} onClose={() => setSheet(null)} title={selectedM?.name ?? ""}>
+        {selectedM && (
           <>
-            <p className="tabular text-[32px] font-semibold">{formatRp(ms[sheet]!.amount)}</p>
-            <p className="mt-2 text-sm text-muted-foreground">{ms[sheet]!.motivasi}</p>
+            <p className="tabular text-[32px] font-semibold">{formatRp(selectedM.amount)}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{selectedM.motivasi}</p>
             <div className="mt-4 rounded-2xl bg-surface p-4 text-sm">
-              {ms[sheet]!.amount <= h.saldo ? <span className="font-medium text-foreground">Sudah tercapai. Alhamdulillah!</span>
-                : <>Estimasi tercapai: <b>{est(ms[sheet]!.amount)}</b></>}
+              {selectedM.amount <= h.saldo ? <span className="font-medium text-foreground">Sudah tercapai. Alhamdulillah!</span>
+                : <>Estimasi tercapai: <b>{est(selectedM.amount)}</b></>}
             </div>
           </>
         )}
-      </Sheet>
-
-      <Sheet open={sheet === "save"} onClose={() => setSheet(null)} title="Nabung Rutin">
-        <p className="text-sm text-muted-foreground">Setoran otomatis tiap Jumat dari Ala Dompet.</p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {[50_000, 100_000, 150_000, 250_000].map((v) => (
-            <motion.button key={v} {...press} onClick={() => setWeekly(v)} className={`tabular h-11 rounded-full px-4 text-xs font-medium ${weekly === v ? "bg-primary text-primary-foreground" : "bg-surface"}`}>{formatRp(v)}</motion.button>
-          ))}
-        </div>
-        <div className="mt-5 space-y-4">
-          <Toggle on={autoOn} set={setAutoOn} label="Setoran otomatis tiap Jumat" />
-          <Toggle on={lockOn} set={setLockOn} label="Kunci Ala Impian" note="Dana dikunci khusus untuk haji, tidak bisa terpakai untuk jajan." />
-        </div>
-        <motion.button {...press} onClick={() => { setSheet(null); toast.success("Pengaturan disimpan"); }} className="mt-6 h-12 w-full rounded-full bg-primary text-sm font-semibold text-primary-foreground">Simpan</motion.button>
-      </Sheet>
-
-      <Sheet open={sheet === "transact"} onClose={() => setSheet(null)} title="Setor tunai di kasir">
-        {sheet === "transact" && <CashCode />}
       </Sheet>
 
       <Sheet open={sheet === "earn"} onClose={() => setSheet(null)} title="Bagi hasil syariah">
@@ -367,7 +355,7 @@ function ImpianHaji() {
             <motion.div key="coach" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-50 flex items-end bg-navy-deep/40 p-5 pb-28">
               <motion.div key={coach} initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={spring} className="card-soft w-full p-5">
                 <p className="text-xs font-medium text-muted-foreground">{coach + 1} / 3</p>
-                <p className="mt-1 text-base font-semibold">{coaches[coach]!.text}</p>
+                <p className="mt-1 text-base font-semibold">{coaches[coach]?.text}</p>
                 <div className="mt-4 flex justify-between">
                   <button onClick={() => setCoach(-1)} className="h-11 px-2 text-sm text-muted-foreground">Lewati</button>
                   <motion.button {...press} onClick={() => setCoach(coach < 2 ? coach + 1 : -1)} className="h-11 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground">{coach < 2 ? "Lanjut" : "Mengerti"}</motion.button>
@@ -391,42 +379,3 @@ function StepCard({ tag, title, children, onClick, id }: { tag: string; title: s
   );
 }
 
-function Toggle({ on, set, label, note }: { on: boolean; set: (v: boolean) => void; label: string; note?: string }) {
-  return (
-    <button type="button" role="switch" aria-checked={on} onClick={() => set(!on)} className="flex w-full items-start justify-between gap-4 text-left">
-      <span><span className="block text-sm font-medium">{label}</span>{note && <span className="mt-1 block text-xs text-muted-foreground">{note}</span>}</span>
-      <span className={`flex h-7 w-12 shrink-0 items-center rounded-full p-1 transition-colors ${on ? "justify-end bg-mint" : "justify-start bg-muted"}`}>
-        <motion.span layout transition={spring} className="h-5 w-5 rounded-full bg-card shadow-[var(--shadow-card)]" />
-      </span>
-    </button>
-  );
-}
-
-function CashCode() {
-  const [code] = useState(() => String(Math.floor(100000 + Math.random() * 900000)));
-  const [shown, setShown] = useState(0);
-  const [left, setLeft] = useState(30 * 60);
-  useEffect(() => {
-    const t = setInterval(() => setShown((s) => (s >= 6 ? s : s + 1)), 60);
-    const c = setInterval(() => setLeft((l) => Math.max(0, l - 1)), 1000);
-    return () => { clearInterval(t); clearInterval(c); };
-  }, []);
-  const mm = String(Math.floor(left / 60)).padStart(2, "0"), ss = String(left % 60).padStart(2, "0");
-  return (
-    <>
-      <div className="flex items-center gap-3 rounded-2xl bg-surface p-4 text-sm"><Wallet size={20} strokeWidth={1.75} className="text-primary" />Dari Ala Dompet: gratis, langsung masuk.</div>
-      <div className="mt-4 rounded-3xl bg-navy p-5 text-center text-primary-foreground">
-        <p className="text-xs text-primary-foreground/70">Kode setor tunai</p>
-        <p className="tabular mt-1 text-[36px] font-semibold tracking-[0.3em]">{code.slice(0, shown).padEnd(6, "·")}</p>
-        <p className="tabular text-xs text-primary-foreground/70">Berlaku {mm}:{ss}</p>
-        <button onClick={() => { navigator.clipboard?.writeText(code); toast.success("Kode disalin"); }} className="mx-auto mt-2 flex h-11 items-center gap-1 text-xs font-medium text-mint"><Copy size={16} strokeWidth={1.75} />Salin kode</button>
-      </div>
-      <ol className="mt-4 space-y-3 text-sm">
-        {[[Store, "Datang ke kasir Alfamart/Alfamidi terdekat."], [Banknote, "Bilang \"Setor Aladin\" dan tunjukkan kode ini."], [Check, "Bayar tunai, saldo haji langsung bertambah."]].map(([I, t], i) => {
-          const Icon = I as typeof Store;
-          return <li key={i} className="flex items-center gap-3"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-primary"><Icon size={16} strokeWidth={1.75} /></span>{t as string}</li>;
-        })}
-      </ol>
-    </>
-  );
-}
