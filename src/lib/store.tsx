@@ -31,9 +31,9 @@ type AppContextValue = {
   deposit: (amount: number) => void; celebrations: Milestone[]; dismissCelebration: () => void;
 };
 // Keep provider/consumer identity aligned when Vite replaces this module.
-const AppContext = (import.meta.hot?.data.appContext as ReturnType<typeof createContext<AppContextValue | null>> | undefined)
+const AppContext = (import.meta.hot?.data?.appContext as ReturnType<typeof createContext<AppContextValue | null>> | undefined)
   ?? createContext<AppContextValue | null>(null);
-if (import.meta.hot) import.meta.hot.data.appContext = AppContext;
+if (import.meta.hot?.data) import.meta.hot.data.appContext = AppContext;
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState(initialState);
   const [stepView, setStepView] = useState<StepView | null>(null);
