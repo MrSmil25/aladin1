@@ -83,7 +83,7 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="id">
       <head><HeadContent /></head>
-      <body>{children}<Scripts /></body>
+      <body><AppProvider>{children}</AppProvider><Scripts /></body>
     </html>
   );
 }
@@ -100,7 +100,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AppProvider><MotionConfig reducedMotion="user">
+      <MotionConfig reducedMotion="user">
         <div className="flex min-h-screen items-center justify-center sm:py-6">
           <div className="relative h-[100dvh] w-full overflow-hidden bg-background sm:h-[844px] sm:w-[390px] sm:rounded-[44px] sm:shadow-[var(--shadow-navy)]">
             <LayoutGroup>
@@ -120,7 +120,7 @@ function RootComponent() {
             <Toaster position="top-center" toastOptions={{ className: "font-sans" }} style={{ position: "absolute" }} />
           </div>
         </div>
-      </MotionConfig></AppProvider>
+      </MotionConfig>
     </QueryClientProvider>
   );
 }

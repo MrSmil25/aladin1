@@ -25,11 +25,15 @@ export function applyDeposit(state: AppState, amount: number): AppState {
 export function crossedMilestones(before: number, after: number) {
   return mock.haji.milestones.filter(m => m.amount > before && m.amount <= after);
 }
-const AppContext = createContext<{
+type AppContextValue = {
   state: AppState; setAppState: (next: Partial<AppState>) => void;
   stepView: StepView | null; openStep: (view?: StepView) => void; closeStep: () => void;
   deposit: (amount: number) => void; celebrations: Milestone[]; dismissCelebration: () => void;
-} | null>(null);
+};
+// Keep provider/consumer identity aligned when Vite replaces this module.
+const AppContext = (import.meta.hot?.data.appContext as ReturnType<typeof createContext<AppContextValue | null>> | undefined)
+  ?? createContext<AppContextValue | null>(null);
+if (import.meta.hot) import.meta.hot.data.appContext = AppContext;
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState(initialState);
   const [stepView, setStepView] = useState<StepView | null>(null);

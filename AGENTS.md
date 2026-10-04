@@ -9,6 +9,6 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Keep prototype balances, savings settings and STEP overlays in one root-mounted React context; this synchronizes all pages without persisting or performing real banking transactions.
+- Keep prototype balances, savings settings and STEP overlays in one shell-mounted React context with stable HMR identity; this covers route boundaries and keeps refreshed providers and consumers aligned without real banking transactions.
 - Reuse the global STEP SAVE and TRANSACT views for card and menu entry points; this prevents divergent settings and deposit-code experiences.
 - Generate milestone share artwork as a browser-side 9:16 PNG using Canvas and semantic CSS tokens; this makes the shared file match the displayed achievement without server dependencies.
