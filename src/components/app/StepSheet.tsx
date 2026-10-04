@@ -7,23 +7,24 @@ import { Switch } from "@/components/ui/switch";
 import { Sheet, Portal } from "./Sheet";
 import { Money, Kaaba } from "./primitives";
 import { useAppActions, type StepView, type Milestone } from "@/lib/store";
+import { DEPOSIT_CHIPS, DEPOSIT_MIN, WEEKLY_CHIPS } from "@/data/mock";
 import { formatRp } from "@/lib/estimate";
-import { spring } from "@/lib/motion";
+import { delay, dur, easeOut, phaseMs, spring } from "@/lib/motion";
 
 const titles: Record<StepView, string> = { menu: "Ambil STEP", deposit: "Setor sekarang", transact: "Setor tunai di kasir", save: "Nabung Rutin", how: "Cara kerja STEP" };
 const options = [
   { view: "deposit", icon: Wallet, title: "Setor sekarang", note: "Dari Ala Dompet" },
   { view: "transact", icon: Store, title: "Setor tunai", note: "Di Alfamart / Alfamidi" },
   { view: "save", icon: CalendarDays, title: "Atur setoran otomatis", note: "Nabung rutin tiap Jumat" },
-  { view: "family", icon: Users, title: "Ajak keluarga", note: "Bagikan link undangan" },
+  { view: "family", icon: Users, title: "Ajak keluarga", note: "Bagikan tautan undangan" },
   { view: "how", icon: Info, title: "Cara kerja STEP", note: "Satu langkah, lebih dekat" },
 ] as const;
 async function shareInvitation() {
   const url = new URL("/impian-haji", window.location.origin).href;
   try {
     if (navigator.share) await navigator.share({ title: "Ambil STEP bersama", text: "Yuk, ikut menabung untuk impian haji. #MyFirstSTEP", url });
-    else { await navigator.clipboard.writeText(url); toast.success("Link undangan disalin"); }
-  } catch (error) { if (!(error instanceof DOMException && error.name === "AbortError")) toast.error("Link belum bisa dibagikan. Coba lagi."); }
+    else { await navigator.clipboard.writeText(url); toast.success("Tautan undangan disalin"); }
+  } catch (error) { if (!(error instanceof DOMException && error.name === "AbortError")) toast.error("Tautan belum bisa dibagikan. Coba lagi."); }
 }
 export function StepSheet() {
   const { stepView, openStep, closeStep } = useAppActions();
@@ -36,7 +37,7 @@ export function StepSheet() {
         <AnimatePresence mode="wait" initial={false} custom={direction}>
           <motion.div key={stepView} custom={direction}
             variants={{ enter: (d: number) => ({ x: reduce ? 0 : d * 32, opacity: 0 }), exit: (d: number) => ({ x: reduce ? 0 : -d * 32, opacity: 0 }) }}
-            initial="enter" animate={{ x: 0, opacity: 1 }} exit="exit" transition={{ duration: reduce ? 0 : 0.18 }}>
+            initial="enter" animate={{ x: 0, opacity: 1 }} exit="exit" transition={{ duration: reduce ? 0 : dur.standard, ease: easeOut }}>
             {stepView === "menu" && <div className="divide-y">{options.map(({ view, icon: Icon, title, note }) => <Button key={view} variant="ghost" onClick={() => { if (view === "family") void shareInvitation(); else { setDirection(1); openStep(view); } }} className="h-auto min-h-16 w-full justify-start gap-3 rounded-none px-1 py-3 whitespace-normal text-left"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent text-primary"><Icon /></span><span className="flex-1"><span className="block text-sm font-semibold">{title}</span><span className="block text-xs text-muted-foreground">{note}</span></span><ChevronRight className="text-muted-foreground" /></Button>)}</div>}
             {stepView === "deposit" && <Deposit />}
             {stepView === "transact" && <CashCode />}
@@ -51,25 +52,25 @@ export function StepSheet() {
 }
 function Deposit() {
   const { state, deposit } = useAppActions();
-  const [amount, setAmount] = useState(10_000);
+  const [amount, setAmount] = useState(DEPOSIT_MIN);
   const [phase, setPhase] = useState<"idle" | "loading" | "done">("idle");
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
-  const invalid = !Number.isSafeInteger(amount) || amount < 10_000 || amount > state.dompet.saldo;
+  const invalid = !Number.isSafeInteger(amount) || amount < DEPOSIT_MIN || amount > state.dompet.saldo;
   const submit = () => {
     if (invalid || phase !== "idle") return;
     setPhase("loading");
-    timers.current.push(setTimeout(() => setPhase("done"), 500));
+    timers.current.push(setTimeout(() => setPhase("done"), phaseMs.done));
     timers.current.push(setTimeout(() => {
       try { deposit(amount); toast.success(`Langkah tercatat · ${Math.min(100, ((state.haji.saldo + amount) / state.haji.target) * 100).toLocaleString("id-ID", { maximumFractionDigits: 2 })}% lebih dekat`); }
       catch { setPhase("idle"); toast.error("Saldo Ala Dompet tidak cukup"); }
-    }, 700));
+    }, phaseMs.deposit));
   };
   return <form onSubmit={e => { e.preventDefault(); submit(); }}>
     <div className="mb-5 flex items-center gap-3 rounded-lg bg-surface p-4"><Wallet className="text-primary" size={22} /><div><p className="text-xs text-muted-foreground">Saldo Ala Dompet</p><Money value={state.dompet.saldo} className="text-base font-semibold" /></div></div>
-    <fieldset disabled={phase !== "idle"}><legend className="mb-2 text-sm font-medium">Pilih nominal</legend><LayoutGroup id="step-amount"><div className="grid grid-cols-2 gap-2">{[10_000, 25_000, 50_000, 100_000].map(value => <Button key={value} type="button" variant="ghost" aria-pressed={amount === value} onClick={() => setAmount(value)} className={`relative h-11 overflow-hidden rounded-full bg-surface ${amount === value ? "text-primary-foreground hover:text-primary-foreground" : ""}`}>{amount === value && <motion.span layoutId="selected-amount" className="absolute inset-0 rounded-full bg-primary" transition={spring} />}<span className="relative tabular">{formatRp(value)}</span></Button>)}</div></LayoutGroup>
+    <fieldset disabled={phase !== "idle"}><legend className="mb-2 text-sm font-medium">Pilih nominal</legend><LayoutGroup id="step-amount"><div className="grid grid-cols-2 gap-2">{DEPOSIT_CHIPS.map(value => <Button key={value} type="button" variant="ghost" aria-pressed={amount === value} onClick={() => setAmount(value)} className={`relative h-11 overflow-hidden rounded-full bg-surface ${amount === value ? "text-primary-foreground hover:text-primary-foreground" : ""}`}>{amount === value && <motion.span layoutId="selected-amount" className="absolute inset-0 rounded-full bg-primary" transition={spring} />}<span className="relative tabular">{formatRp(value)}</span></Button>)}</div></LayoutGroup>
     <label className="mt-5 block text-sm font-medium" htmlFor="step-amount">Nominal lain</label><input id="step-amount" inputMode="numeric" autoComplete="off" value={amount ? amount.toLocaleString("id-ID") : ""} onChange={e => setAmount(Number(e.target.value.replace(/\D/g, "")))} className="mt-2 h-12 w-full rounded-lg border bg-background px-4 tabular text-lg outline-none focus:ring-2 focus:ring-ring" aria-describedby="deposit-error" />
-    <p id="deposit-error" className={`mt-2 min-h-5 text-xs ${invalid ? "text-destructive" : "text-muted-foreground"}`}>{amount > state.dompet.saldo ? "Saldo Ala Dompet tidak cukup." : "Minimum setoran Rp10.000 · Gratis biaya"}</p></fieldset>
+    <p id="deposit-error" className={`mt-2 min-h-5 text-xs ${invalid ? "text-destructive" : "text-muted-foreground"}`}>{amount > state.dompet.saldo ? "Saldo Ala Dompet tidak cukup." : `Minimum setoran ${formatRp(DEPOSIT_MIN)} · Gratis biaya`}</p></fieldset>
     <Button type="submit" disabled={invalid || phase !== "idle"} aria-label={phase === "idle" ? "Setor" : phase === "loading" ? "Memproses setoran" : "Setoran berhasil"} className="mt-5 h-12 w-full rounded-full"><AnimatePresence mode="wait" initial={false}><motion.span key={phase} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2">{phase === "idle" ? <><ArrowDownToLine />Setor</> : phase === "loading" ? <><LoaderCircle className="step-spinner" />Memproses</> : <><Check />Tercatat</>}</motion.span></AnimatePresence></Button>
   </form>;
 }
@@ -78,7 +79,7 @@ function SaveSettings() {
   const [weekly, setWeekly] = useState(state.haji.setoranPerMinggu);
   const [auto, setAuto] = useState(state.autoOn);
   const [lock, setLock] = useState(state.lockOn);
-  return <><p className="text-sm text-muted-foreground">Setoran otomatis tiap Jumat dari Ala Dompet.</p><div className="mt-4 grid grid-cols-2 gap-2">{[50_000, 100_000, 150_000, 250_000].map(v => <Button key={v} variant={weekly === v ? "default" : "secondary"} aria-pressed={weekly === v} className="h-11 rounded-full text-xs" onClick={() => setWeekly(v)}>{formatRp(v)}</Button>)}</div><div className="mt-5 space-y-5">{[{ label: "Setoran otomatis tiap Jumat", value: auto, set: setAuto }, { label: "Kunci Ala Impian", value: lock, set: setLock }].map(item => <label key={item.label} className="flex items-center justify-between gap-4 text-sm font-medium">{item.label}<Switch checked={item.value} onCheckedChange={item.set} aria-label={item.label} /></label>)}<p className="text-xs text-muted-foreground">Dana dikunci khusus untuk haji, tidak bisa terpakai untuk jajan.</p></div><Button className="mt-6 h-12 w-full rounded-full" onClick={() => { setAppState({ haji: { ...state.haji, setoranPerMinggu: weekly }, autoOn: auto, lockOn: lock }); closeStep(); toast.success("Pengaturan disimpan"); }}>Simpan</Button></>;
+  return <><p className="text-sm text-muted-foreground">Setoran otomatis tiap Jumat dari Ala Dompet.</p><div className="mt-4 grid grid-cols-2 gap-2">{WEEKLY_CHIPS.slice(1).map(v => <Button key={v} variant={weekly === v ? "default" : "secondary"} aria-pressed={weekly === v} className="h-11 rounded-full text-xs" onClick={() => setWeekly(v)}>{formatRp(v)}</Button>)}</div><div className="mt-5 space-y-5">{[{ label: "Setoran otomatis tiap Jumat", value: auto, set: setAuto }, { label: "Kunci Ala Impian", value: lock, set: setLock }].map(item => <label key={item.label} className="flex items-center justify-between gap-4 text-sm font-medium">{item.label}<Switch checked={item.value} onCheckedChange={item.set} aria-label={item.label} /></label>)}<p className="text-xs text-muted-foreground">Dana dikunci khusus untuk haji, tidak bisa terpakai untuk jajan.</p></div><Button className="mt-6 h-12 w-full rounded-full" onClick={() => { setAppState({ haji: { ...state.haji, setoranPerMinggu: weekly }, autoOn: auto, lockOn: lock }); closeStep(); toast.success("Pengaturan disimpan"); }}>Simpan</Button></>;
 }
 function CashCode() {
   const [code] = useState(() => String(Math.floor(100000 + Math.random() * 900000)));
@@ -99,7 +100,7 @@ function MilestoneCelebration() {
     if (!reduce && navigator.vibrate) navigator.vibrate(20);
     let active = true;
     void createShareImage(milestone, Math.min(100, state.haji.saldo / state.haji.target * 100)).then(url => { if (active) setImage(url); });
-    const timer = setTimeout(() => setSharing(true), reduce ? 0 : 900);
+    const timer = setTimeout(() => setSharing(true), reduce ? 0 : dur.celebrate * 1000);
     return () => { active = false; clearTimeout(timer); };
   }, [milestone, reduce, state.haji.saldo, state.haji.target]);
   const share = async () => {
@@ -107,12 +108,12 @@ function MilestoneCelebration() {
     setBusy(true);
     try { const blob = await (await fetch(image)).blob(); const file = new File([blob], "MyFirstSTEP.png", { type: "image/png" });
       if (navigator.canShare?.({ files: [file] })) await navigator.share({ files: [file], title: `Tonggak ${milestone?.name} tercapai`, text: "#MyFirstSTEP" });
-      else { const a = document.createElement("a"); a.href = image; a.download = file.name; a.click(); toast.success("Kartu share diunduh"); }
+      else { const a = document.createElement("a"); a.href = image; a.download = file.name; a.click(); toast.success("Kartu berbagi diunduh"); }
     } catch (error) { if (!(error instanceof DOMException && error.name === "AbortError")) toast.error("Kartu belum bisa dibagikan"); }
     finally { setBusy(false); }
   };
   return <Portal><AnimatePresence>{milestone && <motion.div role="dialog" aria-modal="true" aria-label={sharing ? "Bagikan tonggak" : "Tonggak tercapai"} className="absolute inset-0 z-[70] flex flex-col items-center justify-center bg-navy-deep/90 px-6 text-center text-primary-foreground" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-    {!sharing ? <><div className="relative flex h-36 w-36 items-center justify-center"><motion.span className="absolute inset-3 rounded-full border-2 border-mint shadow-[var(--shadow-glow)]" initial={{ scale: reduce ? 1 : 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.6 }} /><motion.span className="flex h-24 w-24 items-center justify-center rounded-full bg-mint text-mint-foreground" initial={{ scale: reduce ? 1 : 0.4 }} animate={{ scale: 1 }} transition={spring}><Check size={42} /></motion.span>{!reduce && Array.from({ length: 6 }, (_, i) => <motion.span key={i} className="absolute text-mint" initial={{ x: 0, y: 0, opacity: 0 }} animate={{ x: Math.cos(i * Math.PI / 3) * 100, y: Math.sin(i * Math.PI / 3) * 100, opacity: [0, 1, 0], scale: [0.5, 1, 0.6] }} transition={{ duration: 0.85 }}><Sparkles size={14} /></motion.span>)}</div><p className="mt-6 text-xl font-semibold">Tonggak {milestone.name} tercapai</p></> : <motion.div initial={{ y: reduce ? 0 : 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={spring} className="flex max-h-full w-full flex-col items-center gap-4 py-5"><div className="flex w-full items-center justify-between"><p className="text-left text-sm font-semibold">Tonggak {milestone.name} tercapai</p><Button variant="ghost" size="icon" aria-label="Tutup perayaan" onClick={dismissCelebration}><X /></Button></div>{image ? <img src={image} alt={`Tonggak ${milestone.name} · ${Math.min(100, state.haji.saldo / state.haji.target * 100).toLocaleString("id-ID", { maximumFractionDigits: 2 })}% · #MyFirstSTEP`} className="aspect-[9/16] min-h-0 w-auto max-w-full flex-1 rounded-lg object-contain" /> : <div className="flex aspect-[9/16] min-h-0 w-full flex-1 items-center justify-center"><LoaderCircle /></div>}<Button disabled={!image || busy} onClick={share} className="h-12 w-full shrink-0 rounded-full bg-mint text-mint-foreground hover:bg-mint/90"><Share2 />Bagikan</Button><Button variant="ghost" onClick={dismissCelebration} className="shrink-0 text-primary-foreground">Nanti saja</Button></motion.div>}
+    {!sharing ? <><div className="relative flex h-36 w-36 items-center justify-center"><motion.span className="absolute inset-3 rounded-full border-2 border-mint shadow-[var(--shadow-glow)]" initial={{ scale: reduce ? 1 : 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: reduce ? 0 : dur.emphasis, ease: easeOut }} /><motion.span className="flex h-24 w-24 items-center justify-center rounded-full bg-mint text-mint-foreground" initial={{ scale: reduce ? 1 : 0.4 }} animate={{ scale: 1 }} transition={spring}><Check size={42} /></motion.span>{!reduce && Array.from({ length: 6 }, (_, i) => <motion.span key={i} className="absolute text-mint" initial={{ x: 0, y: 0, opacity: 0 }} animate={{ x: Math.cos(i * Math.PI / 3) * 100, y: Math.sin(i * Math.PI / 3) * 100, opacity: [0, 1, 0], scale: [0.5, 1, 0.6] }} transition={{ duration: dur.celebrate, ease: easeOut }}><Sparkles size={14} /></motion.span>)}</div><p className="mt-6 text-xl font-semibold">Tonggak {milestone.name} tercapai</p></> : <motion.div initial={{ y: reduce ? 0 : 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={spring} className="flex max-h-full w-full flex-col items-center gap-4 py-5"><div className="flex w-full items-center justify-between"><p className="text-left text-sm font-semibold">Tonggak {milestone.name} tercapai</p><Button variant="ghost" size="icon" aria-label="Tutup perayaan" onClick={dismissCelebration}><X /></Button></div>{image ? <img src={image} alt={`Tonggak ${milestone.name} · ${Math.min(100, state.haji.saldo / state.haji.target * 100).toLocaleString("id-ID", { maximumFractionDigits: 2 })}% · #MyFirstSTEP`} className="aspect-[9/16] min-h-0 w-auto max-w-full flex-1 rounded-lg object-contain" /> : <div className="flex aspect-[9/16] min-h-0 w-full flex-1 items-center justify-center"><LoaderCircle /></div>}<Button disabled={!image || busy} onClick={share} className="h-12 w-full shrink-0 rounded-full bg-mint text-mint-foreground hover:bg-mint/90"><Share2 />Bagikan</Button><Button variant="ghost" onClick={dismissCelebration} className="shrink-0 text-primary-foreground">Nanti saja</Button></motion.div>}
   </motion.div>}</AnimatePresence></Portal>;
 }
 async function createShareImage(milestone: Milestone, percent: number) {

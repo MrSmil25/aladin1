@@ -1,14 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { AnimatePresence, motion, useMotionValue } from "framer-motion";
+import { AnimatePresence, motion, useMotionValue, useReducedMotion } from "framer-motion";
 import {
   ArrowLeft, Banknote, Check, ChevronRight, Copy, Flame, MoreVertical, Play, Share2, ShieldCheck, Sparkles, Store, Users, Wallet,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
-import { mock } from "@/data/mock";
+import { DEPOSIT_MIN, mock } from "@/data/mock";
 import { useAppState, useAppActions } from "@/lib/store";
 import { estimasiSiapDaftar, formatBulan, formatRp } from "@/lib/estimate";
-import { dur, easeOut, press, spring } from "@/lib/motion";
+import { delay, dur, easeOut, press, spring } from "@/lib/motion";
 import { Kaaba, Money, Progress, notInPrototype } from "@/components/app/primitives";
 import { Button } from "@/components/ui/button";
 import { Portal, Sheet } from "@/components/app/Sheet";
@@ -37,6 +37,7 @@ const inView = {
 };
 
 function ImpianHaji() {
+  const reduced = useReducedMotion();
   const app = useAppState();
   const { openStep } = useAppActions();
   const nav = useNavigate();
@@ -67,10 +68,10 @@ function ImpianHaji() {
   useEffect(() => {
     const el = document.getElementById("app-scroll");
     if (!el) return;
-    const on = () => py.set(el.scrollTop * 0.3);
+    const on = () => py.set(reduced ? 0 : el.scrollTop * 0.3);
     el.addEventListener("scroll", on, { passive: true });
     return () => el.removeEventListener("scroll", on);
-  }, [py]);
+  }, [py, reduced]);
 
   useEffect(() => {
     if (coachShown) return;
@@ -79,7 +80,7 @@ function ImpianHaji() {
     return () => clearTimeout(t);
   }, []);
 
-  const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "center" });
+  const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: reduced ? "instant" : "smooth", block: "center" });
   const coaches = [
     { id: "jalur", text: "Ini jalur hajimu" },
     { id: "next-step", text: "Ambil langkah di sini" },
@@ -93,7 +94,7 @@ function ImpianHaji() {
     const text = `Yuk ikut setor ke ${title} di Aladin`;
     try {
       if (navigator.share) await navigator.share({ title, text, url });
-      else { await navigator.clipboard.writeText(url); toast.success("Link undangan disalin"); }
+      else { await navigator.clipboard.writeText(url); toast.success("Tautan undangan disalin"); }
     } catch { /* dismissed */ }
   };
 
@@ -121,7 +122,7 @@ function ImpianHaji() {
           </div>
           <div className="mt-3 flex items-center gap-2">
             <h1 className="text-xl font-semibold">{title}</h1>
-            <span className="rounded-full bg-primary-foreground/10 px-2 py-0.5 text-xs font-medium text-primary-foreground/80">Dengan Partner BPKH</span>
+            <span className="rounded-full bg-primary-foreground/10 px-2 py-0.5 text-xs font-medium text-primary-foreground/80">Dengan Mitra BPKH</span>
           </div>
           <div className="mt-4 flex items-end justify-between">
             <div>
@@ -148,7 +149,7 @@ function ImpianHaji() {
             <h2 className="text-xl font-semibold">Perjalanan menuju setoran awal</h2>
             <div className="relative mt-5" style={{ height: total + 40 }}>
               <svg className="absolute left-0 top-0" width="40" height={total + 40} aria-hidden>
-                <line x1="20" y1="20" x2="20" y2={total + 20} stroke="var(--border)" strokeWidth="4" strokeLinecap="round" style={{ stroke: "oklch(0.21 0.04 265 / 12%)" }} />
+                <line x1="20" y1="20" x2="20" y2={total + 20} stroke="var(--border)" strokeWidth="4" strokeLinecap="round"  />
                 <motion.line x1="20" y1="20" x2="20" animate={{ y2: 20 + posY }} stroke="var(--mint)" strokeWidth="4" strokeLinecap="round"
                   initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: dur.emphasis * 2, ease: easeOut }} />
               </svg>
@@ -158,8 +159,8 @@ function ImpianHaji() {
                 return (
                   <motion.button key={m.name} {...press}
                     onClick={() => (last ? nav({ to: "/impian-haji/siap-daftar" }) : setSheet(i))}
-                    className="absolute left-0 flex w-full items-center gap-4 text-left" style={{ top: i * ROW, height: 40 }}>
-                    <motion.span initial={{ scale: 0.6, opacity: 0.4 }} whileInView={{ scale: 1, opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.1 + i * 0.08, ...spring }}
+                    className="absolute left-0 flex w-full items-center gap-4 text-left" style={{ top: i * ROW, height: 44 }}>
+                    <motion.span initial={{ scale: 0.6, opacity: 0.4 }} whileInView={{ scale: 1, opacity: 1 }} viewport={{ once: true }} transition={{ delay: delay.first + i * delay.short, ...spring }}
                       className={`relative z-10 ml-[8px] flex h-6 w-6 items-center justify-center rounded-full border-2 ${done ? "border-mint bg-mint text-mint-foreground" : "border-muted-foreground/30 bg-background"}`}>
                       {done && <Check size={14} strokeWidth={3} />}
                       {last && !done && <Kaaba className="h-4 w-4 text-navy" />}
@@ -174,9 +175,9 @@ function ImpianHaji() {
               })}
               {nextM && (
                 <motion.div className="pointer-events-none absolute left-0 z-20 flex items-center" style={{ top: posY + 20 - 8 }}
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}>
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: dur.celebrate }}>
                   <span className="relative ml-[12px] flex h-4 w-4">
-                    <motion.span className="absolute inset-0 rounded-full bg-primary" animate={{ scale: [1, 2.2], opacity: [0.5, 0] }} transition={{ delay: 1.2, duration: 1.8, repeat: Infinity, ease: "easeOut" }} />
+                    <motion.span className="absolute inset-0 rounded-full bg-primary" animate={reduced ? {} : { scale: [1, 2.2], opacity: [0.5, 0] }} transition={{ delay: dur.shimmer, duration: dur.pulse, repeat: Infinity, ease: easeOut }} />
                     <span className="relative h-4 w-4 rounded-full border-2 border-background bg-primary" />
                   </span>
                   <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs font-medium text-primary-foreground" style={{ position: "relative", left: 210 }}>Kamu di sini</span>
@@ -188,7 +189,7 @@ function ImpianHaji() {
 
         {/* 3) STEP BERIKUTNYA */}
         {nextM && (
-          <motion.section id="next-step" {...inView} className="card-soft flex items-center gap-4 p-5">
+          <motion.section id="next-step" {...inView} className="card-soft flex flex-wrap items-center gap-4 p-5">
             <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-accent text-primary"><Sparkles size={24} strokeWidth={1.75} /></span>
             <div className="flex-1">
               <p className="text-xs font-medium text-muted-foreground">STEP berikutnya</p>
@@ -209,15 +210,15 @@ function ImpianHaji() {
             <p className="mt-1">Tunai di kasir Alfamart/Alfamidi</p>
           </StepCard>
           <StepCard id="earn-card" tag="E · Earn" title="Bagi Hasil" onClick={() => setSheet("earn")}>
-            <p>Bulan ini ≈ <Money value={mock.haji.bagiHasilBulanIni} className="font-semibold text-profit" /></p>
+            <p>Bulan ini ≈ <Money value={mock.haji.bagiHasilBulanIni} className="font-semibold text-profit-ink" /></p>
             <span className="mt-1 inline-block rounded-full bg-muted px-1.5 text-[11px]">indikatif</span>
-            <p className="mt-1">Nisbah {mock.haji.nisbah} · Indikasi 8% p.a.</p>
+            <p className="mt-1">Nisbah {mock.haji.nisbah} · Indikasi {mock.haji.bagiHasil} per tahun</p>
           </StepCard>
           <StepCard tag="P · Progress" title="Progresmu" onClick={() => scrollTo("jalur")}>
             <div className="flex gap-1">
               {Array.from({ length: mock.haji.streakJumat }).map((_, i) => (
-                <motion.span key={i} initial={{ opacity: 0.2, scale: 0.6 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.2 + i * 0.15, ...spring }}>
-                  <Flame size={16} strokeWidth={1.75} className="fill-profit/40 text-profit" />
+                <motion.span key={i} initial={{ opacity: 0.2, scale: 0.6 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: dur.micro + i * dur.micro, ...spring }}>
+                  <Flame size={16} strokeWidth={1.75} className="fill-profit/40 text-profit-ink" />
                 </motion.span>
               ))}
             </div>
@@ -235,7 +236,7 @@ function ImpianHaji() {
           <h2 className="mt-3 text-base font-semibold">Ajak keluarga ikut menabung</h2>
           <p className="mt-1 text-sm text-muted-foreground">Ayah dan Sarah bisa ikut setor ke {title === "Haji Saya" ? "Haji untuk Ibu" : title}.</p>
           <motion.button {...press} onClick={share} className="mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-full border border-primary/20 text-sm font-semibold text-primary">
-            <Share2 size={18} strokeWidth={1.75} />Bagikan link undangan
+            <Share2 size={18} strokeWidth={1.75} />Bagikan tautan undangan
           </motion.button>
         </motion.section>
 
@@ -246,25 +247,25 @@ function ImpianHaji() {
             <div className="islamic-pattern absolute inset-0" />
             <div className="relative">
               <p className="text-xs font-medium text-mint">TANTANGAN</p>
-              <h3 className="text-base font-semibold">30 Days Closer</h3>
+              <h3 className="text-base font-semibold">30 Hari Lebih Dekat</h3>
               <div className="mt-4 grid grid-cols-10 gap-1.5">
                 {Array.from({ length: 30 }).map((_, i) => {
                   const day = i + 1, done = day < mock.haji.challengeDay, now = day === mock.haji.challengeDay;
                   return (
                     <motion.span key={i} initial={{ opacity: 0.15 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
-                      transition={{ delay: day <= mock.haji.challengeDay ? i * 0.015 : 0 }}
+                      transition={{ delay: day <= mock.haji.challengeDay ? i * delay.stagger : 0 }}
                       className={`aspect-square rounded-md ${done ? "bg-mint" : now ? "bg-primary-foreground ring-2 ring-mint" : "bg-primary-foreground/10"}`} />
                   );
                 })}
               </div>
               <p className="mt-3 text-xs text-primary-foreground/70">Hari ke-{mock.haji.challengeDay}. Nabung sedikit tiap hari, konsistensi lebih penting dari nominal.</p>
-              <motion.button {...press} disabled={joined} onClick={() => { setJoined(true); toast.success("Kamu ikut tantangan 30 Days Closer!"); }}
+              <motion.button {...press} disabled={joined} onClick={() => { setJoined(true); toast.success("Kamu ikut tantangan 30 Hari Lebih Dekat!"); }}
                 className="mt-4 h-11 w-full rounded-full bg-mint text-sm font-semibold text-mint-foreground disabled:opacity-60">{joined ? "Sudah ikut" : "Ikut Tantangan"}</motion.button>
             </div>
           </motion.div>
 
           <motion.div {...inView}>
-            <h3 className="mb-3 text-base font-semibold">STEP Stories</h3>
+            <h3 className="mb-3 text-base font-semibold">Cerita STEP</h3>
             <div className="no-scrollbar -mx-5 flex snap-x gap-3 overflow-x-auto px-5">
               {mock.stories.map((s, i) => (
                 <div key={s.name} className="card-soft w-[78%] shrink-0 snap-start overflow-hidden">
@@ -278,7 +279,7 @@ function ImpianHaji() {
               ))}
               <button onClick={notInPrototype} className="relative flex aspect-[9/16] w-[46%] shrink-0 snap-start flex-col items-center justify-center rounded-3xl bg-navy p-4 text-center text-primary-foreground">
                 <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-foreground/15"><Play size={24} strokeWidth={1.75} className="fill-primary-foreground" /></span>
-                <span className="mt-3 text-xs text-primary-foreground/70">Konten creator campaign (placeholder)</span>
+                <span className="mt-3 text-xs text-primary-foreground/70">Konten kampanye ilustrasi</span>
               </button>
             </div>
             <p className="mt-2 text-xs text-muted-foreground">Cerita dan nama bersifat ilustrasi.</p>
@@ -293,7 +294,7 @@ function ImpianHaji() {
               <li key={t} className="flex items-center gap-3"><span className="flex h-5 w-5 items-center justify-center rounded-full bg-mint text-mint-foreground"><Check size={12} strokeWidth={3} /></span>{t}</li>
             ))}
           </ul>
-          <Link to="/impian-haji/siap-daftar" className="mt-4 flex min-h-11 items-center text-sm font-semibold text-primary">Apa yang terjadi saat Rp25 juta? <ChevronRight size={18} strokeWidth={1.75} /></Link>
+          <Link to="/impian-haji/siap-daftar" className="mt-4 flex min-h-11 items-center text-sm font-semibold text-primary">Apa yang terjadi saat {formatRp(mock.haji.target)}? <ChevronRight size={18} strokeWidth={1.75} /></Link>
         </motion.section>
 
         {/* 8) RIWAYAT */}
@@ -301,7 +302,7 @@ function ImpianHaji() {
           <h2 className="mb-3 text-xl font-semibold">Riwayat Menabung</h2>
           {h.saldo === 0 ? (
             <div className="card-soft p-6 text-center">
-              <p className="text-sm font-semibold">Langkah pertama cukup Rp10.000.</p>
+              <p className="text-sm font-semibold">Langkah pertama cukup {formatRp(DEPOSIT_MIN)}.</p>
               <motion.button {...press} onClick={() => openStep("deposit")} className="mt-4 h-11 w-full rounded-full bg-primary text-sm font-semibold text-primary-foreground">Setor sekarang</motion.button>
             </div>
           ) : (
@@ -309,7 +310,7 @@ function ImpianHaji() {
               {[...app.deposits, ...mock.riwayat].map((r, i) => (
                 <div key={i} className="flex items-center justify-between py-3.5">
                   <div><p className="text-sm font-medium">{r.label}</p><p className="text-xs text-muted-foreground">{r.date}</p></div>
-                  <span className={`tabular text-sm font-semibold ${r.label === "Bagi hasil" ? "text-profit" : ""}`}>+{formatRp(r.amount)}</span>
+                  <span className={`tabular text-sm font-semibold ${r.label === "Bagi hasil" ? "text-profit-ink" : ""}`}>+{formatRp(r.amount)}</span>
                 </div>
               ))}
             </div>
@@ -318,7 +319,7 @@ function ImpianHaji() {
 
         {/* 9) SEGERA HADIR */}
         <div className="flex items-center justify-between rounded-2xl border border-dashed p-4 text-xs text-muted-foreground">
-          <span>Round-Up: pembulatan transaksi masuk tabungan haji</span>
+          <span>Pembulatan: pembulatan transaksi masuk tabungan haji</span>
           <span className="ml-3 shrink-0 rounded-full bg-muted px-2 py-0.5 font-medium">Usulan fitur</span>
         </div>
       </div>
@@ -343,9 +344,9 @@ function ImpianHaji() {
         <p className="mt-2 text-sm">Hasilnya masuk setiap akhir bulan dan ikut menambah tabungan hajimu.</p>
         <div className="mt-4 rounded-2xl bg-surface p-4">
           <p className="text-xs text-muted-foreground">Perkiraan bulan ini</p>
-          <Money value={mock.haji.bagiHasilBulanIni} className="text-[32px] font-semibold text-profit" />
+          <Money value={mock.haji.bagiHasilBulanIni} className="text-[32px] font-semibold text-profit-ink" />
         </div>
-        <p className="mt-3 text-xs text-muted-foreground">Indikasi 8% p.a. bersifat indikatif dan tidak dijamin.</p>
+        <p className="mt-3 text-xs text-muted-foreground">Indikasi {mock.haji.bagiHasil} per tahun bersifat indikatif dan tidak dijamin.</p>
       </Sheet>
 
       {/* Coach marks */}
@@ -372,7 +373,7 @@ function ImpianHaji() {
 function StepCard({ tag, title, children, onClick, id }: { tag: string; title: string; children: ReactNode; onClick: () => void; id?: string }) {
   return (
     <motion.button id={id} {...inView} whileTap={{ scale: 0.97 }} onClick={onClick} className="card-soft relative flex min-h-40 flex-col p-4 text-left">
-      <span className="absolute right-3 top-3 text-[11px] font-medium text-muted-foreground">{tag}</span>
+      <span className="mb-2 text-[11px] font-medium text-muted-foreground">{tag}</span>
       <span className="text-base font-semibold">{title}</span>
       <div className="mt-2 text-xs text-muted-foreground">{children}</div>
     </motion.button>

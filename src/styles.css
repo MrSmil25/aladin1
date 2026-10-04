@@ -39,6 +39,7 @@
   --color-badge: var(--badge);
   --color-surface: var(--surface);
   --color-stage: var(--stage);
+  --color-profit-ink: var(--profit-ink);
 }
 
 :root {
@@ -66,6 +67,7 @@
   --navy-deep: oklch(0.17 0.07 270);            /* #071233 */
   --mint: oklch(0.82 0.16 163);                 /* #2FE0A0 */
   --mint-foreground: oklch(0.2 0.06 270);
+  --profit-ink: oklch(0.43 0.09 62);
   --profit: oklch(0.77 0.16 72);                /* #F5A524 */
   --badge: oklch(0.55 0.2 20);                  /* #D62839 */
   --surface: oklch(0.97 0.006 260);
@@ -117,15 +119,35 @@
 
 @keyframes twinkle { 0%,100% { opacity: .25 } 50% { opacity: .9 } }
 @keyframes shimmer { from { transform: translateX(-100%) } to { transform: translateX(100%) } }
-.star { animation: twinkle 6s ease-in-out infinite; }
+.star { animation: twinkle var(--motion-twinkle) var(--motion-ease-in-out) infinite; }
 @keyframes step-spin { to { transform: rotate(360deg); } }
-.step-spinner { animation: step-spin 0.7s linear infinite; }
+.step-spinner { animation: step-spin var(--motion-loading) linear 1; }
 .skeleton-shimmer { position: relative; overflow: hidden; background: var(--muted); }
 .skeleton-shimmer::after {
   content: ""; position: absolute; inset: 0;
   background: linear-gradient(90deg, transparent, oklch(1 0 0 / 70%), transparent);
-  animation: shimmer 0.6s ease-out infinite;
+  animation: shimmer var(--motion-skeleton) var(--motion-ease) 1;
 }
 @media (prefers-reduced-motion: reduce) {
   .star, .skeleton-shimmer::after, .step-spinner { animation: none; }
+}
+
+.pitch-heading { font-size: 64px; line-height: 1.12; letter-spacing: 0; }
+.pitch-subheading { font-size: 44px; line-height: 1.15; letter-spacing: 0; }
+@media (max-width: 767px) {
+  .pitch-heading { font-size: 38px; }
+  .pitch-subheading { font-size: 30px; }
+  .pitch-comparison { gap: 24px; }
+  .pitch-phone { max-width: 245px; }
+}
+@media (max-height: 740px) and (max-width: 767px) {
+  .pitch-scene { padding-top: 60px; padding-bottom: 44px; }
+  .pitch-subheading { font-size: 26px; }
+  .pitch-comparison { gap: 16px; }
+  .pitch-phone { padding: 12px; max-width: 230px; }
+  .pitch-phone p { margin-top: 8px; }
+  .pitch-phone > div:first-child { margin-bottom: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0s !important; transition-duration: 0s !important; }
 }

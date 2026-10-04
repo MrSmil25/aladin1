@@ -7,7 +7,7 @@ import {
 import { useState } from "react";
 import { mock } from "@/data/mock";
 import { useAppState } from "@/lib/store";
-import { firstVisit, press, staggerChild, staggerParent } from "@/lib/motion";
+import { dur, easeOut, firstVisit, press, staggerChild, staggerParent } from "@/lib/motion";
 import { HajjCard } from "@/components/app/HajjCard";
 import { Kaaba, Money, Skeleton, notInPrototype, useFirstLoad } from "@/components/app/primitives";
 
@@ -42,7 +42,7 @@ function Beranda() {
   const hajiTo = app.userState === "baru" ? "/impian-haji/rencana" : "/impian-haji";
 
   const actions = [
-    { l: "Transfer", i: Send }, { l: "Tarik", i: ArrowDownToLine }, { l: "Setor", i: ArrowUpFromLine }, { l: "Bayar & Beli", i: Receipt },
+    { l: "Kirim", i: Send }, { l: "Tarik", i: ArrowDownToLine }, { l: "Setor", i: ArrowUpFromLine }, { l: "Bayar & Beli", i: Receipt },
   ];
 
   return (
@@ -72,7 +72,7 @@ function Beranda() {
             <div className="rounded-2xl bg-surface p-4">
               <div className="flex justify-between text-xs font-medium">
                 <span className="text-muted-foreground">Ala Dompet</span>
-                <button onClick={() => nav({ to: "/keuangan" })} className="text-primary">Detail</button>
+                <button onClick={() => nav({ to: "/keuangan" })} className="min-h-11 min-w-11 text-primary">Detail</button>
               </div>
               <div className="mt-1 flex items-center gap-2">
                 {show ? <Money value={app.dompet.saldo} className="text-xl font-semibold" /> : <span className="text-xl font-semibold tracking-widest">Rp•••••••</span>}
@@ -113,7 +113,7 @@ function Beranda() {
           <motion.section {...staggerChild}>
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-xl font-semibold">Temukan Berkah</h2>
-              <button onClick={notInPrototype} className="text-xs font-medium text-primary">Lihat Semua</button>
+              <button onClick={notInPrototype} className="min-h-11 text-xs font-medium text-primary">Lihat Semua</button>
             </div>
             <div className="no-scrollbar -mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5"
               onScroll={(e) => setSlide(Math.round(e.currentTarget.scrollLeft / (e.currentTarget.clientWidth * 0.85)))}>
@@ -129,13 +129,13 @@ function Beranda() {
               </motion.button>
               {[1, 2].map((i) => (
                 <div key={i} className="flex h-40 w-[85%] shrink-0 snap-start items-center justify-center rounded-3xl bg-muted text-xs font-medium text-muted-foreground">
-                  <Gift size={20} strokeWidth={1.75} className="mr-2" />Promo partner
+                  <Gift size={20} strokeWidth={1.75} className="mr-2" />Promo mitra
                 </div>
               ))}
             </div>
             <div className="mt-3 flex gap-1.5">
               {[0, 1, 2].map((i) => (
-                <motion.span key={i} animate={{ width: slide === i ? 16 : 6 }} className={`h-1.5 rounded-full ${slide === i ? "bg-mint" : "bg-muted"}`} />
+                <motion.span key={i} animate={{ width: slide === i ? 16 : 6 }} transition={{ duration: dur.micro, ease: easeOut }} className={`h-1.5 rounded-full ${slide === i ? "bg-mint" : "bg-muted"}`} />
               ))}
             </div>
           </motion.section>
@@ -148,7 +148,7 @@ function Beranda() {
                 <div className="flex justify-between">
                   <div>
                     <p className="text-base font-semibold">Ala Impian Haji</p>
-                    <p className="mt-2 text-xs font-medium text-profit">Bagi hasil indikatif 8% p.a.*</p>
+                    <p className="mt-2 text-xs font-medium text-profit-ink">Bagi hasil indikatif {mock.haji.bagiHasil} per tahun*</p>
                     <p className="mt-1 text-xs text-muted-foreground">Terhubung SISKOHAT</p>
                   </div>
                   <Kaaba className="h-12 w-12 text-navy" />
@@ -158,7 +158,7 @@ function Beranda() {
                 <div className="flex justify-between">
                   <div>
                     <p className="text-base font-semibold">Ala Deposito</p>
-                    <p className="mt-2 text-xs font-medium text-profit">Bagi hasil 8,5% p.a.*</p>
+                    <p className="mt-2 text-xs font-medium text-profit-ink">Bagi hasil {mock.products.find(p => p.id === "deposito")?.badge} per tahun*</p>
                     <p className="mt-1 text-xs text-muted-foreground">Maksimalkan bagi hasil</p>
                   </div>
                   <Landmark size={40} strokeWidth={1.5} className="text-navy" />

@@ -1,7 +1,7 @@
 import { animate, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState, useRef, type ReactNode } from "react";
 import { toast } from "sonner";
-import { dur, easeOut, press } from "@/lib/motion";
+import { delay as motionDelay, dur, easeOut, phaseMs, press } from "@/lib/motion";
 import { formatRp } from "@/lib/estimate";
 import { mock } from "@/data/mock";
 
@@ -15,13 +15,13 @@ export function Money({ value, className }: { value: number; className?: string 
     const from = previous.current;
     previous.current = value;
     if (reduce) return setV(value);
-    const c = animate(from, value, { duration: 0.45, ease: easeOut, onUpdate: setV });
+    const c = animate(from, value, { duration: dur.count, ease: easeOut, onUpdate: setV });
     return () => c.stop();
   }, [value, reduce]);
   return <span className={`tabular ${className ?? ""}`}>{formatRp(v)}</span>;
 }
 
-export function Progress({ pct, layoutId, track = "bg-muted", delay = 0.1 }: { pct: number; layoutId?: string; track?: string; delay?: number }) {
+export function Progress({ pct, layoutId, track = "bg-muted", delay = motionDelay.first }: { pct: number; layoutId?: string; track?: string; delay?: number }) {
   const reduce = useReducedMotion();
   const safePct = Math.max(0, Math.min(100, pct));
   return (

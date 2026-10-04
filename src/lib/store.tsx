@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
-import { mock, type UserState } from "@/data/mock";
+import { DEPOSIT_MIN, mock, type UserState } from "@/data/mock";
 
 export type StepView = "menu" | "deposit" | "transact" | "save" | "how";
 export type Milestone = (typeof mock.haji.milestones)[number];
@@ -17,7 +17,7 @@ export const initialState: AppState = {
   autoOn: true, lockOn: true, deposits: [],
 };
 export function applyDeposit(state: AppState, amount: number): AppState {
-  if (!Number.isSafeInteger(amount) || amount < 10_000 || amount > state.dompet.saldo) throw new Error("Nominal setoran tidak valid");
+  if (!Number.isSafeInteger(amount) || amount < DEPOSIT_MIN || amount > state.dompet.saldo) throw new Error("Nominal setoran tidak valid");
   return { ...state, userState: "aktif", dompet: { saldo: state.dompet.saldo - amount },
     haji: { ...state.haji, saldo: state.haji.saldo + amount },
     deposits: [{ label: "Setor dari Ala Dompet", date: new Date().toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }), amount }, ...state.deposits] };
